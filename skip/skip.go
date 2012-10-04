@@ -5,30 +5,32 @@
 package skip
 
 import (
+	"fmt"
 	"math/rand"
 )
 
 type Lesser interface {
-	Less (Lesser) bool
+	Less(Lesser) bool
 }
 
 type List struct {
 	links []link
-	cnt int
+	cnt   int
 }
 type link struct {
-	to *node
+	to    *node
 	width int
 }
 type node struct {
 	links []link
-	key Lesser
-	val interface{}
+	key   Lesser
+	val   interface{}
 }
 
-func (l *List) Insert(key Lesser, val interface{}) *List{
+// Insert inserts a {key,val} pair into the skip list.
+func (l *List) Insert(key Lesser, val interface{}) *List {
 	l.grow()
-	level := len(l.links)-1
+	level := len(l.links) - 1
 	insert(&l.links[level].to, level, &node{[]link{}, key, val})
 	return l
 }
@@ -40,8 +42,7 @@ func insert(p **node, level int, nu *node) (width int, stop bool) {
 	}
 	// At the bottom level, simply link in the node
 	if level == 0 {
-		nu.links[0].to = *p
-		nu.links[0].width = 1
+		nu.links = append(nu.links, link{*p, 1})
 		return 1, false
 	}
 	// Link in the new node at the lower levels.
@@ -56,14 +57,13 @@ func insert(p **node, level int, nu *node) (width int, stop bool) {
 	// Link in the node on this level.
 	fullWidth := (*p).links[level].width + 1
 	(*p).links[level].width = width
-	nu.links[level].width = fullWidth - width
-	nu.links[level].to = nu
-	return width+1, false
+	nu.links = append(nu.links, link{nu, fullWidth - width})
+	return width + 1, false
 }
 
 // Remove the youngest key/value pair associated with key from the skiplist, if a match exists.
 func (l *List) Remove(key Lesser) (val interface{}, ok bool) {
-	level := len(l.links)-1
+	level := len(l.links) - 1
 	removed, ok := remove(&l.links[level].to, level-1, key)
 	if !ok {
 		return nil, false
@@ -88,21 +88,21 @@ func remove(p **node, level int, key Lesser) (removed *node, ok bool) {
 			(*p).links[level].to = removed.links[level].to
 			(*p).links[level].width += removed.links[level].width - 1
 		}
-		(*p).links[level].width -= 1;
+		(*p).links[level].width -= 1
 	}
 	return removed, ok
 }
 
 // RemoveIndex returns and removes the key,value pair stored at pos, in O(N) time.
 func (l *List) RemoveN(pos int) (key Lesser, val interface{}, ok bool) {
-	level := len(l.links)-1
+	level := len(l.links) - 1
 	removed, ok := removeN(&l.links[level].to, level, pos)
 	if !ok {
 		return nil, nil, false
 	}
 	return removed.key, removed.val, true
 }
-func removeN (p **node, level int, pos int) (removed *node, ok bool) {
+func removeN(p **node, level int, pos int) (removed *node, ok bool) {
 	for *p != nil && pos > (*p).links[level].width {
 		pos -= (*p).links[level].width
 		p = &(*p).links[level].to
@@ -120,17 +120,17 @@ func removeN (p **node, level int, pos int) (removed *node, ok bool) {
 		(*p).links[level].to = removed.links[level].to
 		(*p).links[level].width += removed.links[level].width - 1
 	} else if ok {
-		(*p).links[level].width -= 1;
+		(*p).links[level].width -= 1
 	}
 	return removed, ok
 }
 
 // Find returns the youngest value associated with key in the skiplist.
-func (l *List) Peek (key Lesser) (val interface{}, ok bool) {
-	level := len(l.links)-1
-	n := l.links[level].to;
+func (l *List) Peek(key Lesser) (val interface{}, ok bool) {
+	level := len(l.links) - 1
+	n := l.links[level].to
 	for level >= 0 {
-		for n!=nil && n.key.Less(key) {
+		for n != nil && n.key.Less(key) {
 			n = n.links[level].to
 		}
 		level--
@@ -141,13 +141,18 @@ func (l *List) Peek (key Lesser) (val interface{}, ok bool) {
 	return n.val, true
 }
 
-// ValN returns the youngest key,value pair stored at pos.
+// Len returns the number of elements in the List.
+func (l *List) Len() int {
+	return l.cnt
+}
+
+// ValN returns the key,value pair stored at pos.
 func (l *List) PeekN(pos int) (key Lesser, val interface{}, ok bool) {
 	pos++
-	level := len(l.links)-1
-	n := l.links[level].to;
+	level := len(l.links) - 1
+	n := l.links[level].to
 	for level >= 0 {
-		for n!=nil && pos >= n.links[level].width {
+		for n != nil && pos >= n.links[level].width {
 			pos -= n.links[level].width
 			n = n.links[level].to
 		}
@@ -159,23 +164,27 @@ func (l *List) PeekN(pos int) (key Lesser, val interface{}, ok bool) {
 	return n.key, n.val, true
 }
 
-// Len returns the number of elements in the List.
-func (l *List) Len() int {
-	return l.cnt
-}
-
 // Increment the list count and increment the number of levels on power-of-two counts.
 func (l *List) grow() {
 	l.cnt++
-	if l.cnt & (l.cnt-1) == 0 {
-		l.links = append(l.links, link{nil,l.cnt+1})
+	if l.cnt&(l.cnt-1) == 0 {
+		l.links = append(l.links, link{nil, l.cnt + 1})
 	}
 }
 
 // Decrement the list count and decrement the number of levels on power-of-two counts.
 func (l *List) shrink() {
-	if l.cnt & (l.cnt-1) == 0 {
+	if l.cnt&(l.cnt-1) == 0 {
 		l.links = l.links[:len(l.links)-1]
 	}
 	l.cnt--
+}
+
+// Function String prints only the key/value pairs in the skip list.
+func (l *List) String() {
+	s := append([]byte{}, "{"...)
+	for n := l.links[0].to; n != nil; n = l.links[0].to {
+		s = append(s, fmt.Sprint(n.key, ":", n.val, " ")...)
+	}
+	s[len(s)-1] = '}'
 }
