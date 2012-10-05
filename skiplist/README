@@ -1,0 +1,65 @@
+PACKAGE
+
+package skiplist
+    import "github.com/glenn-brown/container/skiplist"
+
+    Package skip implements a skip list. A skip.List stores key/value pairs
+    sorted by key. Values can be referenced by key or position. Operations
+    require O(log(N)) time and space. The skiplist requires O(N) space.
+
+    The skiplist is linked at multiple levels. The bottom level (L0) is a
+    sorted linked list of entries, and each link has a link at the next
+    higher level added with probability 1/2 at insertion. Also, each link
+    has an associated 'width' specifying the number of nodes it skips, so
+    nodes can also be referenced by position.
+
+    For example, a 64-entry skip list with values from 0x00 to 0x3f might
+    look like this:
+
+	L5 --------------------------------------------------------------->/
+	L4 ---------------------------------->->-------------------------->/
+	L3 ------------------->>-->-------->->->-------------------------->/
+	L2 -->------------>->->>-->-------->->->-->--->->---------->------>/
+	L1 >->->-->-->-->>>->->>>->-------->->->-->->->->-->--->--->------>/
+	L0 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>/
+	   0000000000000000111111111111111122222222222222223333333333333333
+	   0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
+
+TYPES
+
+type Lesser interface {
+    Less(Lesser) bool
+}
+
+type Skiplist struct {
+    // contains filtered or unexported fields
+}
+
+func New(rng *rand.Rand) (l *Skiplist)
+    New creates a Skiplist.
+
+func (l *Skiplist) Insert(key Lesser, val interface{}) *Skiplist
+    Insert inserts a {key,val} pair into the skip list.
+
+func (l *Skiplist) Len() int
+    Len returns the number of elements in the Skiplist.
+
+func (l *Skiplist) Peek(key Lesser) (val interface{}, ok bool)
+    Peek returns the youngest value associated with key in the skiplist,
+    without modifying the list.
+
+func (l *Skiplist) PeekN(pos int) (key Lesser, val interface{}, ok bool)
+    Find returns the youngest value associated with key in the skiplist.
+
+func (l *Skiplist) Remove(key Lesser) (val interface{}, ok bool)
+    Remove removes the youngest key/value pair associated with key from the
+    skiplist, if a match exists.
+
+func (l *Skiplist) RemoveN(pos int) (key Lesser, val interface{}, ok bool)
+    RemoveIndex returns and removes the key,value pair stored at pos, in
+    O(N) time.
+
+func (l *Skiplist) String()
+    Function String prints only the key/value pairs in the skip list.
+
+
