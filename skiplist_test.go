@@ -108,9 +108,21 @@ func TestSkiplist_Insert(t *testing.T) {
 }
 
 func BenchmarkSkiplist_Insert(b *testing.B) {
+	b.StopTimer()
 	s := New(less, nil)
+	b.StartTimer()
 	for i:=0; i<b.N; i++ {
 		s.Insert(i,i)
+	}
+}
+
+func BenchmarkSkiplist_Remove(b *testing.B) {
+	b.StopTimer()
+	s := skiplist(0, b.N-1)
+	a := shuffleRange (0, b.N-1)
+	b.StartTimer()
+	for _, key := range a {
+		s.Remove(key)
 	}
 }
 
