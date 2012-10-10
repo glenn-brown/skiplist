@@ -14,6 +14,7 @@
 //   }
 // Pop the first element in the list with s.RemoveN(0).  Pop the last
 // with s.RemoveN(s.Len()-1).
+//
 package skiplist
 
 import (
@@ -166,7 +167,7 @@ func (s *Skiplist) remove(links *[]link, level int, key interface{}) *Element {
 	return removed
 }
 
-// RemoveN removes any element at position pos in O(log(pos)) time,
+// RemoveN removes any element at position pos in O(log(N)) time,
 // returning it or nil.
 //
 func (l *Skiplist) RemoveN(pos int) *Element {
@@ -174,16 +175,7 @@ func (l *Skiplist) RemoveN(pos int) *Element {
 	if pos > l.cnt {
 		return nil
 	}
-	// Carefully the start-search level.  If we don't, the search
-	// is technically O(log(l.cnt)) instead of O(log(pos)).
-	levels := len(l.links)
-	level := 0
-	for ; level < levels-1; level++ {
-		if pos < 1<<uint(level) {
-			break
-		}
-	}
-	removed := removeN(&l.links, level, pos)
+	removed := removeN(&l.links, len(l.links)-1, pos)
 	l.shrink()
 	return removed
 }
@@ -208,7 +200,7 @@ func removeN(links *[]link, level int, pos int) (removed *Element) {
 		(*links)[level].width += removed.links[level].width - 1
 	} else {
 		// Account for Element not linked at this level.
-		(*links)[level].width--
+		(*links)[level].width -= 1
 	}
 	return removed
 }
