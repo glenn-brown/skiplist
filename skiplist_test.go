@@ -110,11 +110,12 @@ func TestSkiplist_Insert(t *testing.T) {
 
 func BenchmarkSkiplist_Insert(b *testing.B) {
 	b.StopTimer()
+	a := shuffleRange(0, b.N-1)
 	s := New(less, nil)
 	runtime.GC()
 	b.StartTimer()
-	for i:=0; i<b.N; i++ {
-		s.Insert(i,i)
+	for i, key := range a {
+		s.Insert(key, i)
 	}
 }
 
@@ -142,7 +143,7 @@ func TestSkiplist_Remove(t *testing.T) {
 
 func BenchmarkSkiplist_Remove(b *testing.B) {
 	b.StopTimer()
-	a := shuffleRange (0, b.N-1)
+	a := shuffleRange(0, b.N-1)
 	s := skiplist(0, b.N-1)
 	runtime.GC()
 	b.StartTimer()
@@ -180,7 +181,7 @@ func TestSkiplist_RemoveN(t *testing.T) {
 
 func BenchmarkSkiplist_RemoveN(b *testing.B) {
 	b.StopTimer()
-	a := shuffleRange (0, b.N-1)
+	a := shuffleRange(0, b.N-1)
 	s := skiplist(0, b.N-1)
 	runtime.GC()
 	b.StartTimer()
@@ -207,7 +208,7 @@ func TestSkiplist_Find(t *testing.T) {
 	
 func BenchmarkSkiplist_FindN(b *testing.B) {
 	b.StopTimer()
-	a := shuffleRange (0, b.N-1)
+	a := shuffleRange(0, b.N-1)
 	s := skiplist(0, b.N-1)
 	runtime.GC()
 	b.StartTimer()
@@ -256,26 +257,25 @@ func ExampleSkiplist_String() {
 
 func ExampleVisualization() {
 	s := New(less, nil)
-	for i := 0; i < 64; i++ {
+	for i := 0; i < 23; i++ {
 		s.Insert(i, i)
 	}
 	fmt.Println(s.Visualization())
 	// Output:
-	// L6 ---------------------------------------------------------------->
-	// L5 ---------------------------------------------------->----------->
-	// L4 -------------------------->------------------------->----------->
-	// L3 -------------->----------->---->---->---------->---->->--------->
-	// L2 --->--->--->-->----->->--->>->->->-->-->----->->---->->--------->
-	// L1 --->--->--->>->>>>-->>>>-->>->->>>>->>>>>>--->>>--->>->>>--->-->>
-	// L0 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-	//    0000000000000000111111111111111122222222222222223333333333333333
-	//    0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
+	// L4 |---------------------------------------------------------------------->/
+	// L3 |------------------------------------------->|------------------------->/
+	// L2 |---------->|---------->|---------->|------->|---------------->|---->|->/
+	// L1 |---------->|---------->|---------->|->|---->|->|->|->|------->|->|->|->/
+	// L0 |->|->|->|->|->|->|->|->|->|->|->|->|->|->|->|->|->|->|->|->|->|->|->|->/
+	//       0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  1  1  1  1  1  1  1  
+	//       0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f  0  1  2  3  4  5  6
 }
 
 func arrow(cnt int) (s string) {
+	cnt *= 3
 	switch {
 	case cnt > 1:
-		return strings.Repeat("-", cnt-1) + ">"
+		return "|" + strings.Repeat("-", cnt-2) + ">"
 	case cnt == 1:
 		return ">"
 	}
@@ -291,15 +291,15 @@ func (l *Skiplist) Visualization() (s string) {
 			w = n.links[level].width
 			s += arrow(w)
 		}
-		s += "\n"
+		s += "/\n"
 	}
-	s += "   "
+	s += "    "
 	for n := l.links[0].to; n != nil; n = n.links[0].to {
-		s += fmt.Sprintf("%x", n.key.(int)>>4&0xf)
+		s += fmt.Sprintf("  %x", n.key.(int)>>4&0xf)
 	}
-	s += "\n   "
+	s += "\n    "
 	for n := l.links[0].to; n != nil; n = n.links[0].to {
-		s += fmt.Sprintf("%x", n.key.(int)&0xf)
+		s += fmt.Sprintf("  %x", n.key.(int)&0xf)
 	}
 	return string(s)
 }
