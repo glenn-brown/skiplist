@@ -138,55 +138,89 @@ func (l *Skiplist) Insert(key interface{}, value interface{}) *Skiplist {
 	return l
 }
 
-// Remove the youngest Element associate with Key, if any, in O(1) time.
+// Remove the youngest Element associate with Key, if any, in O(log(N)) time.
 // Return the removed element or nil.
 //
 func (l *Skiplist) Remove(key interface{}) *Element {
-	removed := l.remove(&l.links, len(l.links)-1, key)
-	if removed != nil {
-		l.shrink()
-	}
-	return removed
-}
-func (s *Skiplist) remove(links *[]link, level int, key interface{}) *Element {
-	// Walk to the correct deletion location.
-	for (*links)[level].to != nil && s.less((*links)[level].to.key, key) {
-		links = &(*links)[level].to.links
-	}
-	// For level 0, simply remove the found Element.
-	if level == 0 {
-		n := (*links)[0].to
-		if n == nil || s.less(key, n.key) {
-			return nil
+	levels := len(l.links)
+	// Create scratch space to store predecessor information.
+	prev := l.prev
+	// Compute elements preceding the insertion location at each level.
+	links := l.links
+	for level := levels-1; level >= 0; level-- {
+		ll := &links[level]
+		// Find predecessor link at this level.
+		for ll.to != nil && l.less(ll.to.key, key) {
+			links = ll.to.links
+			ll = &links[level]
 		}
-		(*links)[0].to = n.links[0].to
-		// width is already 1 for level 0.
-		return n
+		// Record the predecessor at this level and its position.
+		prev[level].link = ll
 	}
-	// For other levels, recur.
-	removed := s.remove(links, level-1, key)
-	if removed != nil {
-		if removed == (*links)[level].to {
-			(*links)[level].to = removed.links[level].to
-			(*links)[level].width += removed.links[level].width - 1
-		} else {
-			(*links)[level].width -= 1
-		}
+	// Verify there is a matching entry to remove.
+	elem := prev[0].link.to
+	if elem == nil || l.less(key, elem.key) {
+		return nil
 	}
-	return removed
+	// At the bottom level, simply unlink the element.
+	prev[0].link.to = elem.links[0].to
+	// Unlink any higher linked levels.
+	level := 1
+	for ; level<levels && prev[level].link.to == elem; level++ {
+		prev[level].link.to = elem.links[level].to
+		prev[level].link.width += elem.links[level].width
+	}
+	// Adjust widths at higher levels
+	for ; level < levels; level++ {
+		prev[level].link.width -= 1
+	}
+	l.shrink()
+	return elem
 }
 
 // RemoveN removes any element at position pos in O(log(N)) time,
 // returning it or nil.
 //
-func (l *Skiplist) RemoveN(pos int) *Element {
-	pos++
-	if pos > l.cnt {
+func (l *Skiplist) RemoveN(index int) *Element {
+	if index >= l.cnt {
 		return nil
 	}
-	removed := removeN(&l.links, len(l.links)-1, pos)
+	levels := len(l.links)
+	// Create scratch space to store predecessor information.
+	prev := l.prev
+	// Compute elements preceding the insertion location at each level.
+	pos := -1
+	links := l.links
+	for level := levels-1; level >= 0; level-- {
+		ll := &links[level]
+		// Find predecessor link at this level.
+		for ll.to != nil && pos + ll.width < index {
+			pos += ll.width
+			links = ll.to.links
+			ll = &links[level]
+		}
+		// Record the predecessor at this level and its position.
+		prev[level].pos = pos
+		prev[level].link = ll
+	}
+	// Set pos to the position of the new element.
+	pos++
+	// Verify there is a matching entry to remove.
+	elem := prev[0].link.to
+	// At the bottom level, simply unlink the element.
+	prev[0].link.to = elem.links[0].to
+	// Unlink any higher linked levels.
+	level := 1
+	for ; level<levels && prev[level].link.to == elem; level++ {
+		prev[level].link.to = elem.links[level].to
+		prev[level].link.width += elem.links[level].width
+	}
+	// Adjust widths at higher levels
+	for ; level < levels; level++ {
+		prev[level].link.width -= 1
+	}
 	l.shrink()
-	return removed
+	return elem
 }
 
 func removeN(links *[]link, level int, pos int) (removed *Element) {
