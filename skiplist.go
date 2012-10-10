@@ -121,6 +121,8 @@ func (l *Skiplist) Insert(key interface{}, value interface{}) *Skiplist {
 		prev[level].pos = pos
 		prev[level].link = ll
 	}
+	// Set pos to the position of the new element.
+	pos++
 	// At the bottom level, simply link in the element
 	nu := &Element{make([]link,1,2), key, value}
 	nu.links[0] = link{prev[0].link.to, 1}
@@ -129,9 +131,9 @@ func (l *Skiplist) Insert(key interface{}, value interface{}) *Skiplist {
 	// Link in the element at a random number of higher levels.
 	for level:=1; level<levels && l.rng.Intn(2) < 1; level++ {
 		end := prev[level].pos + prev[level].link.width
-		nu.links = append(nu.links, link{prev[level].link.to, end - pos - 1})
+		nu.links = append(nu.links, link{prev[level].link.to, end - pos})
 		prev[level].link.to = nu
-		prev[level].link.width = pos - prev[level].pos + 1
+		prev[level].link.width = pos - prev[level].pos
 	}
 	return l
 }
