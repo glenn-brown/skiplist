@@ -12,10 +12,14 @@ import (
 // Utility functions
 //
 
+// Compare 2 interfaced integers.
+//
 func less(a, b interface{}) bool {
 	return a.(int) < b.(int)
 }
 
+// Create a shuffled slice of the integers in [min,max].
+//
 func shuffleRange(min, max int) []int {
 	a := make([]int, max-min+1)
 	for i := range a {
@@ -28,6 +32,8 @@ func shuffleRange(min, max int) []int {
 	return a
 }
 
+// Create a Skiplist with each key in [min,max].
+//
 func skiplist(min, max int) *Skiplist {
 	s := New(less, nil)
 	for _, v := range shuffleRange(min, max) {
@@ -271,6 +277,8 @@ func ExampleVisualization() {
 	//       0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f  0  1  2  3  4  5  6
 }
 
+// Create an arrow string like "|-->" that is cnt runes long.
+//
 func arrow(cnt int) (s string) {
 	cnt *= 3
 	switch {
@@ -282,6 +290,16 @@ func arrow(cnt int) (s string) {
 	return "X"
 }
 
+// Create a visualization string like this:
+//   Output:
+//   L4 |---------------------------------------------------------------------->/
+//   L3 |------------------------------------------->|------------------------->/
+//   L2 |---------->|---------->|---------->|------->|---------------->|---->|->/
+//   L1 |---------->|---------->|---------->|->|---->|->|->|->|------->|->|->|->/
+//   L0 |->|->|->|->|->|->|->|->|->|->|->|->|->|->|->|->|->|->|->|->|->|->|->|->/
+//         0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  1  1  1  1  1  1  1  
+//         0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f  0  1  2  3  4  5  6
+//
 func (l *Skiplist) Visualization() (s string) {
 	for level := len(l.links) - 1; level >= 0; level-- {
 		s += fmt.Sprintf("L%d ", level)
