@@ -205,6 +205,17 @@ func TestSkiplist_Find(t *testing.T) {
 	}
 }
 	
+func BenchmarkSkiplist_FindN(b *testing.B) {
+	b.StopTimer()
+	a := shuffleRange (0, b.N-1)
+	s := skiplist(0, b.N-1)
+	runtime.GC()
+	b.StartTimer()
+	for _, key := range a {
+		s.FindN(key)
+	}
+}
+
 func TestSkiplist_Len(t *testing.T) {
 	s := skiplist(0, 4)
 	if s.Len() != 5 {
@@ -223,6 +234,17 @@ func TestSkiplist_FindN(t *testing.T) {
 		} else if e.Value.(int) != 2*i {
 			t.Error ("bad Value")
 		}
+	}
+}
+
+func BenchmarkSkiplist_Find(b *testing.B) {
+	b.StopTimer()
+	a := shuffleRange (0, b.N-1)
+	s := skiplist(0, b.N-1)
+	runtime.GC()
+	b.StartTimer()
+	for _, key := range a {
+		s.Find(key)
 	}
 }
 
