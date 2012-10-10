@@ -106,14 +106,14 @@ func (l *Skiplist) Insert(key interface{}, value interface{}) *Skiplist {
 	prev := l.prev
 	// Compute elements preceding the insertion location at each level.
 	pos := 0
-	links := &l.links
+	links := l.links
 	for level := levels-1; level >= 0; level-- {
-		ll := &(*links)[level]
+		ll := &links[level]
 		// Find predecessor link at this level.
 		for ll.to != nil && l.less(ll.to.key, key) {
 			pos += ll.width
-			links = &ll.to.links
-			ll = &(*links)[level]
+			links = ll.to.links
+			ll = &links[level]
 		}
 		// Increment the width of the 
 		ll.width += 1
