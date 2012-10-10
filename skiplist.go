@@ -108,16 +108,18 @@ func (l *Skiplist) Insert(key interface{}, value interface{}) *Skiplist {
 	pos := 0
 	links := &l.links
 	for level := levels-1; level >= 0; level-- {
+		ll := &(*links)[level]
 		// Find predecessor link at this level.
-		for (*links)[level].to != nil && l.less((*links)[level].to.key, key) {
-			pos += (*links)[level].width
-			links = &(*links)[level].to.links
+		for ll.to != nil && l.less(ll.to.key, key) {
+			pos += ll.width
+			links = &ll.to.links
+			ll = &(*links)[level]
 		}
 		// Increment the width of the 
-		(*links)[level].width += 1
+		ll.width += 1
 		// Record the predecessor at this level and its position.
 		prev[level].pos = pos
-		prev[level].link = &(*links)[level]
+		prev[level].link = ll
 	}
 	// At the bottom level, simply link in the element
 	nu := &Element{[]link{{prev[0].link.to, 1}}, key, value}
