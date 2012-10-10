@@ -17,12 +17,12 @@ func less(a, b interface{}) bool {
 }
 
 func shuffleRange(min, max int) []int {
-	a := make ([]int, max - min + 1)
-	for i := range(a) {
-		a[i] = min+i
+	a := make([]int, max-min+1)
+	for i := range a {
+		a[i] = min + i
 	}
-	for i := range(a) {
-		other := rand.Intn(max-min+1)
+	for i := range a {
+		other := rand.Intn(max - min + 1)
 		a[i], a[other] = a[other], a[i]
 	}
 	return a
@@ -30,8 +30,8 @@ func shuffleRange(min, max int) []int {
 
 func skiplist(min, max int) *Skiplist {
 	s := New(less, nil)
-	for _, v := range shuffleRange(min,max) {
-		s.Insert (v, 2*v)
+	for _, v := range shuffleRange(min, max) {
+		s.Insert(v, 2*v)
 	}
 	return s
 }
@@ -52,8 +52,8 @@ func TestSkiplist(t *testing.T) {
 }
 
 func TestElement_Key(t *testing.T) {
-	e := skiplist(1,3).Front()
-	for i := 1; i<=3; i++ {
+	e := skiplist(1, 3).Front()
+	for i := 1; i <= 3; i++ {
 		if e == nil || e.Key().(int) != i {
 			t.Fail()
 		}
@@ -70,7 +70,7 @@ func ExampleElement_Next() {
 }
 
 func TestElement_String(t *testing.T) {
-	if fmt.Sprint(skiplist(1,2).Front()) != "1:2" {
+	if fmt.Sprint(skiplist(1, 2).Front()) != "1:2" {
 		t.Fail()
 	}
 }
@@ -80,10 +80,10 @@ func TestNew(t *testing.T) {
 	s := New(less, nil)
 	s1 := New(less, rand.New(rand.NewSource(1)))
 	s42 := New(less, rand.New(rand.NewSource(42)))
-	for i:=0; i<32; i++ {
-		s.Insert(i,i)
-		s1.Insert(i,i)
-		s42.Insert(i,i)
+	for i := 0; i < 32; i++ {
+		s.Insert(i, i)
+		s1.Insert(i, i)
+		s42.Insert(i, i)
 	}
 	v := s.Visualization()
 	v1 := s1.Visualization()
@@ -96,7 +96,7 @@ func TestNew(t *testing.T) {
 }
 
 func TestSkiplist_Front(t *testing.T) {
-	s := skiplist (1,3)
+	s := skiplist(1, 3)
 	if s.Front().Key().(int) != 1 {
 		t.Fail()
 	}
@@ -120,11 +120,11 @@ func BenchmarkSkiplist_Insert(b *testing.B) {
 }
 
 func TestSkiplist_Remove(t *testing.T) {
-	s := skiplist(0,10)
+	s := skiplist(0, 10)
 	if s.Remove(-1) != nil || s.Remove(11) != nil {
 		t.Error("Removing nonexistant key should fail.")
 	}
-	for i:= range shuffleRange(0,10) {
+	for i := range shuffleRange(0, 10) {
 		e := s.Remove(i)
 		if e == nil {
 			t.Error("nil")
@@ -153,10 +153,10 @@ func BenchmarkSkiplist_Remove(b *testing.B) {
 }
 
 func TestSkiplist_RemoveN(t *testing.T) {
-	s := skiplist(0,10)
-	keys := shuffleRange(0,10)
+	s := skiplist(0, 10)
+	keys := shuffleRange(0, 10)
 	cnt := 11
-	for _,key := range(keys) {
+	for _, key := range keys {
 		found, pos := s.Find(key)
 		t.Logf("Removing key=%v at pos=%v", key, pos)
 		t.Log(key, found, pos)
@@ -174,7 +174,7 @@ func TestSkiplist_RemoveN(t *testing.T) {
 		cnt--
 		l := s.Len()
 		if l != cnt {
-			t.Error ("bad Len()=", l, "!=", cnt)
+			t.Error("bad Len()=", l, "!=", cnt)
 		}
 	}
 }
@@ -192,7 +192,7 @@ func BenchmarkSkiplist_RemoveN(b *testing.B) {
 
 func TestSkiplist_Find(t *testing.T) {
 	s := skiplist(0, 9)
-	for i := s.Len()-1; i>=0; i-- {
+	for i := s.Len() - 1; i >= 0; i-- {
 		e, pos := s.Find(i)
 		if e == nil {
 			t.Error("nil")
@@ -201,11 +201,11 @@ func TestSkiplist_Find(t *testing.T) {
 		} else if e.Key().(int) != i {
 			t.Error("bad Key")
 		} else if e.Value.(int) != 2*i {
-			t.Error ("bad Value")
+			t.Error("bad Value")
 		}
 	}
 }
-	
+
 func BenchmarkSkiplist_FindN(b *testing.B) {
 	b.StopTimer()
 	a := shuffleRange(0, b.N-1)
@@ -226,21 +226,21 @@ func TestSkiplist_Len(t *testing.T) {
 
 func TestSkiplist_FindN(t *testing.T) {
 	s := skiplist(0, 9)
-	for i := s.Len()-1; i>=0; i-- {
+	for i := s.Len() - 1; i >= 0; i-- {
 		e := s.FindN(i)
 		if e == nil {
 			t.Error("nil")
 		} else if e.Key().(int) != i {
 			t.Error("bad Key")
 		} else if e.Value.(int) != 2*i {
-			t.Error ("bad Value")
+			t.Error("bad Value")
 		}
 	}
 }
 
 func BenchmarkSkiplist_Find(b *testing.B) {
 	b.StopTimer()
-	a := shuffleRange (0, b.N-1)
+	a := shuffleRange(0, b.N-1)
 	s := skiplist(0, b.N-1)
 	runtime.GC()
 	b.StartTimer()
