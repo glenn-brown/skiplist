@@ -42,11 +42,11 @@ type Skiplist struct {
 	cnt   int
 	less  func(a, b interface{}) bool
 	links []link
-	prev  []struct{		// Scratch structure
+	prev  []struct { // Scratch structure
 		link *link
-		pos int
+		pos  int
 	}
-	rng   *rand.Rand
+	rng *rand.Rand
 }
 type link struct {
 	to    *Element
@@ -83,7 +83,10 @@ func New(less func(key1, key2 interface{}) bool, r *rand.Rand) *Skiplist {
 	if r == nil {
 		r = rand.New(rand.NewSource(42))
 	}
-	return &Skiplist{0, less, []link{}, []struct{link *link;pos int}{}, r}
+	return &Skiplist{0, less, []link{}, []struct {
+		link *link
+		pos  int
+	}{}, r}
 }
 
 // Return the first list element in O(1) time.
@@ -105,7 +108,7 @@ func (l *Skiplist) Insert(key interface{}, value interface{}) *Skiplist {
 	// Compute elements preceding the insertion location at each level.
 	pos := 0
 	links := l.links
-	for level := levels-1; level >= 0; level-- {
+	for level := levels - 1; level >= 0; level-- {
 		ll := &links[level]
 		// Find predecessor link at this level.
 		for ll.to != nil && l.less(ll.to.key, key) {
@@ -122,12 +125,12 @@ func (l *Skiplist) Insert(key interface{}, value interface{}) *Skiplist {
 	// Set pos to the position of the new element.
 	pos++
 	// At the bottom level, simply link in the element
-	nu := &Element{make([]link,1,2), key, value}
+	nu := &Element{make([]link, 1, 2), key, value}
 	nu.links[0] = link{prev[0].link.to, 1}
 	prev[0].link.to = nu
 	prev[0].link.width = 1
 	// Link in the element at a random number of higher levels.
-	for level:=1; level<levels && l.rng.Intn(2) < 1; level++ {
+	for level := 1; level < levels && l.rng.Intn(2) < 1; level++ {
 		end := prev[level].pos + prev[level].link.width
 		nu.links = append(nu.links, link{prev[level].link.to, end - pos})
 		prev[level].link.to = nu
@@ -145,7 +148,7 @@ func (l *Skiplist) Remove(key interface{}) *Element {
 	prev := l.prev
 	// Compute elements preceding the insertion location at each level.
 	links := l.links
-	for level := levels-1; level >= 0; level-- {
+	for level := levels - 1; level >= 0; level-- {
 		ll := &links[level]
 		// Find predecessor link at this level.
 		for ll.to != nil && l.less(ll.to.key, key) {
@@ -164,7 +167,7 @@ func (l *Skiplist) Remove(key interface{}) *Element {
 	prev[0].link.to = elem.links[0].to
 	// Unlink any higher linked levels.
 	level := 1
-	for ; level<levels && prev[level].link.to == elem; level++ {
+	for ; level < levels && prev[level].link.to == elem; level++ {
 		prev[level].link.to = elem.links[level].to
 		prev[level].link.width += elem.links[level].width
 	}
@@ -189,10 +192,10 @@ func (l *Skiplist) RemoveN(index int) *Element {
 	// Compute elements preceding the insertion location at each level.
 	pos := -1
 	links := l.links
-	for level := levels-1; level >= 0; level-- {
+	for level := levels - 1; level >= 0; level-- {
 		ll := &links[level]
 		// Find predecessor link at this level.
-		for ll.to != nil && pos + ll.width < index {
+		for ll.to != nil && pos+ll.width < index {
 			pos += ll.width
 			links = ll.to.links
 			ll = &links[level]
@@ -209,7 +212,7 @@ func (l *Skiplist) RemoveN(index int) *Element {
 	prev[0].link.to = elem.links[0].to
 	// Unlink any higher linked levels.
 	level := 1
-	for ; level<levels && prev[level].link.to == elem; level++ {
+	for ; level < levels && prev[level].link.to == elem; level++ {
 		prev[level].link.to = elem.links[level].to
 		prev[level].link.width += elem.links[level].width
 	}
@@ -232,7 +235,7 @@ func (l *Skiplist) Find(key interface{}) (e *Element, pos int) {
 	prev := l.prev
 	// Compute elements preceding the insertion location at each level.
 	links := l.links
-	for level := levels-1; level >= 0; level-- {
+	for level := levels - 1; level >= 0; level-- {
 		ll := &links[level]
 		// Find predecessor link at this level.
 		for ll.to != nil && l.less(ll.to.key, key) {
@@ -270,10 +273,10 @@ func (l *Skiplist) FindN(index int) *Element {
 	pos := -1
 	links := l.links
 	var ll *link
-	for level := levels-1; level >= 0; level-- {
+	for level := levels - 1; level >= 0; level-- {
 		ll = &links[level]
 		// Find predecessor link at this level.
-		for ll.to != nil && pos + ll.width < index {
+		for ll.to != nil && pos+ll.width < index {
 			pos += ll.width
 			links = ll.to.links
 			ll = &links[level]
@@ -289,7 +292,10 @@ func (l *Skiplist) grow() {
 	l.cnt++
 	if l.cnt&(l.cnt-1) == 0 {
 		l.links = append(l.links, link{nil, l.cnt})
-		l.prev = append(l.prev, struct{link *link;pos int}{})
+		l.prev = append(l.prev, struct {
+			link *link
+			pos  int
+		}{})
 	}
 }
 
