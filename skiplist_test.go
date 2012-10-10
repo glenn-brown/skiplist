@@ -7,6 +7,10 @@ import (
 	"testing"
 )
 
+//
+// Utility functions
+//
+
 func less(a, b interface{}) bool {
 	return a.(int) < b.(int)
 }
@@ -31,6 +35,10 @@ func skiplist(min, max int) *Skiplist {
 	return s
 }
 
+//
+// Benchmarks, examples, and Tests
+//
+
 func TestSkiplist(t *testing.T) {
 	s := skiplist(1, 20)
 	i := 1
@@ -40,7 +48,6 @@ func TestSkiplist(t *testing.T) {
 		}
 		i++
 	}
-	// Output: 1:2 2:4 3:6
 }
 
 func TestElement_Key(t *testing.T) {
@@ -97,6 +104,13 @@ func TestSkiplist_Front(t *testing.T) {
 func TestSkiplist_Insert(t *testing.T) {
 	if skiplist(1, 10).String() != "{1:2 2:4 3:6 4:8 5:10 6:12 7:14 8:16 9:18 10:20}" {
 		t.Fail()
+	}
+}
+
+func BenchmarkSkiplist_Insert(b *testing.B) {
+	s := New(less, nil)
+	for i:=0; i<b.N; i++ {
+		s.Insert(i,i)
 	}
 }
 
