@@ -122,7 +122,8 @@ func (l *Skiplist) Insert(key interface{}, value interface{}) *Skiplist {
 		prev[level].link = ll
 	}
 	// At the bottom level, simply link in the element
-	nu := &Element{[]link{{prev[0].link.to, 1}}, key, value}
+	nu := &Element{make([]link,1,2), key, value}
+	nu.links[0] = link{prev[0].link.to, 1}
 	prev[0].link.to = nu
 	prev[0].link.width = 1
 	// Link in the element at a random number of higher levels.
