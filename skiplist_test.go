@@ -12,6 +12,7 @@ import (
 //	//	//	//	//	//	//	//	//	//
 
 func TestSkiplist(t *testing.T) {
+	t.Parallel()
 	s := skiplist(1, 20)
 	i := 1
 	for e := s.Front(); e != nil; e = e.Next() {
@@ -23,6 +24,7 @@ func TestSkiplist(t *testing.T) {
 }
 
 func TestElement_Key(t *testing.T) {
+	t.Parallel()
 	e := skiplist(1, 3).Front()
 	for i := 1; i <= 3; i++ {
 		if e == nil || e.Key().(int) != i {
@@ -33,12 +35,14 @@ func TestElement_Key(t *testing.T) {
 }
 
 func TestElement_String(t *testing.T) {
+	t.Parallel()
 	if fmt.Sprint(skiplist(1, 2).Front()) != "1:2" {
 		t.Fail()
 	}
 }
 
 func TestNew(t *testing.T) {
+	t.Parallel()
 	// Verify the injected random number generator is used.
 	s := New(less, nil)
 	s1 := New(less, rand.New(rand.NewSource(1)))
@@ -59,6 +63,7 @@ func TestNew(t *testing.T) {
 }
 
 func TestSkiplist_Front(t *testing.T) {
+	t.Parallel()
 	s := skiplist(1, 3)
 	if s.Front().Key().(int) != 1 {
 		t.Fail()
@@ -66,12 +71,14 @@ func TestSkiplist_Front(t *testing.T) {
 }
 
 func TestSkiplist_Insert(t *testing.T) {
+	t.Parallel()
 	if skiplist(1, 10).String() != "{1:2 2:4 3:6 4:8 5:10 6:12 7:14 8:16 9:18 10:20}" {
 		t.Fail()
 	}
 }
 
-func TestSkiplist_Remove(t *testing.T) {
+func TestSkiplist_RemoveHead(t *testing.T) {
+	t.Parallel()
 	s := skiplist(0, 10)
 	if s.Remove(-1) != nil || s.Remove(11) != nil {
 		t.Error("Removing nonexistant key should fail.")
@@ -94,6 +101,7 @@ func TestSkiplist_Remove(t *testing.T) {
 }
 
 func TestSkiplist_RemoveN(t *testing.T) {
+	t.Parallel()
 	s := skiplist(0, 10)
 	keys := shuffleRange(0, 10)
 	cnt := 11
@@ -120,7 +128,8 @@ func TestSkiplist_RemoveN(t *testing.T) {
 	}
 }
 
-func TestSkiplist_Find(t *testing.T) {
+func TestSkiplist_FindForward(t *testing.T) {
+	t.Parallel()
 	s := skiplist(0, 9)
 	for i := s.Len() - 1; i >= 0; i-- {
 		e, pos := s.Find(i)
@@ -137,6 +146,7 @@ func TestSkiplist_Find(t *testing.T) {
 }
 
 func TestSkiplist_Len(t *testing.T) {
+	t.Parallel()
 	s := skiplist(0, 4)
 	if s.Len() != 5 {
 		t.Fail()
@@ -144,6 +154,7 @@ func TestSkiplist_Len(t *testing.T) {
 }
 
 func TestSkiplist_FindN(t *testing.T) {
+	t.Parallel()
 	s := skiplist(0, 9)
 	for i := s.Len() - 1; i >= 0; i-- {
 		e := s.FindN(i)
@@ -195,7 +206,25 @@ func ExampleVisualization() {
 // Benchmarks
 //	//	//	//	//	//	//	//	//	//
 
-func BenchmarkSkiplist_Insert(b *testing.B) {
+func BenchmarkSkiplist_InsertForward(b *testing.B) {
+	b.StopTimer()
+	s := New(less, nil)
+	b.StartTimer()
+	for i:=0; i<b.N; i++ {
+		s.Insert(i, i)
+	}
+}
+
+func BenchmarkSkiplist_InsertReverse(b *testing.B) {
+	b.StopTimer()
+	s := New(less, nil)
+	b.StartTimer()
+	for i:=b.N-1; i>=0; i-- {
+		s.Insert(i, i)
+	}
+}
+
+func BenchmarkSkiplist_InsertShuffle(b *testing.B) {
 	b.StopTimer()
 	a := shuffleRange(0, b.N-1)
 	s := New(less, nil)
@@ -205,7 +234,31 @@ func BenchmarkSkiplist_Insert(b *testing.B) {
 	}
 }
 
-func BenchmarkSkiplist_Find(b *testing.B) {
+func BenchmarkSkiplist_FindForward(b *testing.B) {
+	b.StopTimer()
+	s := New(less, nil)
+	for i:=b.N-1; i>=0; i-- {
+		s.Insert(i,i)
+	}
+	b.StartTimer()
+	for i:=0; i<b.N; i++ {
+		s.Find(i)
+	}
+}
+
+func BenchmarkSkiplist_FindReverse(b *testing.B) {
+	b.StopTimer()
+	s := New(less, nil)
+	for i:=0; i<b.N; i++ {
+		s.Insert(i,i)
+	}
+	b.StartTimer()
+	for i:=b.N-1; i>=0; i-- {
+		s.Find(i)
+	}
+}
+
+func BenchmarkSkiplist_FindShuffle(b *testing.B) {
 	b.StopTimer()
 	a := shuffleRange(0, b.N-1)
 	s := skiplist(0, b.N-1)
@@ -215,7 +268,31 @@ func BenchmarkSkiplist_Find(b *testing.B) {
 	}
 }
 
-func BenchmarkSkiplist_FindN(b *testing.B) {
+func BenchmarkSkiplist_FindNForward(b *testing.B) {
+	b.StopTimer()
+	s := New(less, nil)
+	for i:=b.N-1; i>=0; i-- {
+		s.Insert(i,i)
+	}
+	b.StartTimer()
+	for i:=0; i<b.N; i++ {
+		s.FindN(i)
+	}
+}
+
+func BenchmarkSkiplist_FindNReverse(b *testing.B) {
+	b.StopTimer()
+	s := New(less, nil)
+	for i:=0; i<b.N; i++ {
+		s.Insert(i,i)
+	}
+	b.StartTimer()
+	for i:=b.N-1; i>=0; i-- {
+		s.FindN(i)
+	}
+}
+
+func BenchmarkSkiplist_FindNShuffle(b *testing.B) {
 	b.StopTimer()
 	a := shuffleRange(0, b.N-1)
 	s := skiplist(0, b.N-1)
@@ -225,7 +302,31 @@ func BenchmarkSkiplist_FindN(b *testing.B) {
 	}
 }
 
-func BenchmarkSkiplist_Remove(b *testing.B) {
+func BenchmarkSkiplist_RemoveForward(b *testing.B) {
+	b.StopTimer()
+	s := New(less, nil)
+	for i:=b.N-1; i>=0; i-- {
+		s.Insert(i,i)
+	}
+	b.StartTimer()
+	for i:=0; i<b.N; i++ {
+		s.Remove(i)
+	}
+}
+
+func BenchmarkSkiplist_RemoveReverse(b *testing.B) {
+	b.StopTimer()
+	s := New(less, nil)
+	for i:=0; i<b.N; i++ {
+		s.Insert(i,i)
+	}
+	b.StartTimer()
+	for i:=b.N-1; i>=0; i-- {
+		s.Remove(i)
+	}
+}
+
+func BenchmarkSkiplist_RemoveShuffle(b *testing.B) {
 	b.StopTimer()
 	a := shuffleRange(0, b.N-1)
 	s := skiplist(0, b.N-1)
@@ -235,13 +336,36 @@ func BenchmarkSkiplist_Remove(b *testing.B) {
 	}
 }
 
-func BenchmarkSkiplist_RemoveN(b *testing.B) {
+func BenchmarkSkiplist_RemoveNHead(b *testing.B) {
 	b.StopTimer()
-	a := shuffleRange(0, b.N-1)
+	s := New(less, nil)
+	for i:=b.N-1; i>=0; i-- {
+		s.Insert(i,i)
+	}
+	b.StartTimer()
+	for i:=0; i<b.N; i++ {
+		s.RemoveN(0)
+	}
+}
+
+func BenchmarkSkiplist_RemoveNTail(b *testing.B) {
+	b.StopTimer()
+	s := New(less, nil)
+	for i:=0; i<b.N; i++ {
+		s.Insert(i,i)
+	}
+	b.StartTimer()
+	for i:=b.N-1; i>=0; i-- {
+		s.RemoveN(i)
+	}
+}
+
+func BenchmarkSkiplist_RemoveNMid(b *testing.B) {
+	b.StopTimer()
 	s := skiplist(0, b.N-1)
 	b.StartTimer()
-	for _, key := range a {
-		s.RemoveN(key)
+	for i:=b.N-1; i>=0; i-- {
+		s.RemoveN(i/2)
 	}
 }
 
