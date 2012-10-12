@@ -7,9 +7,9 @@ import (
 	"testing"
 )
 
-//	//	//	//	//	//	//	//	//	//
+////////////////////////////////////////////////////////////////
 // Tests
-//	//	//	//	//	//	//	//	//	//
+////////////////////////////////////////////////////////////////
 
 func TestSkiplist(t *testing.T) {
 	t.Parallel()
@@ -168,9 +168,9 @@ func TestSkiplist_FindN(t *testing.T) {
 	}
 }
 
-//	//	//	//	//	//	//	//	//	//
+////////////////////////////////////////////////////////////////
 // Examples
-//	//	//	//	//	//	//	//	//	//
+////////////////////////////////////////////////////////////////
 
 func ExampleElement_Next() {
 	s := New(less, nil).Insert(0, 0).Insert(1, 2).Insert(2, 4).Insert(3, 6)
@@ -202,15 +202,15 @@ func ExampleVisualization() {
 	//       0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f  0  1  2  3  4  5  6
 }
 
-//	//	//	//	//	//	//	//	//	//
+////////////////////////////////////////////////////////////////
 // Benchmarks
-//	//	//	//	//	//	//	//	//	//
+////////////////////////////////////////////////////////////////
 
 func BenchmarkSkiplist_InsertForward(b *testing.B) {
 	b.StopTimer()
 	s := New(less, nil)
 	b.StartTimer()
-	for i:=0; i<b.N; i++ {
+	for i := 0; i < b.N; i++ {
 		s.Insert(i, i)
 	}
 }
@@ -219,7 +219,7 @@ func BenchmarkSkiplist_InsertReverse(b *testing.B) {
 	b.StopTimer()
 	s := New(less, nil)
 	b.StartTimer()
-	for i:=b.N-1; i>=0; i-- {
+	for i := b.N - 1; i >= 0; i-- {
 		s.Insert(i, i)
 	}
 }
@@ -237,11 +237,11 @@ func BenchmarkSkiplist_InsertShuffle(b *testing.B) {
 func BenchmarkSkiplist_FindForward(b *testing.B) {
 	b.StopTimer()
 	s := New(less, nil)
-	for i:=b.N-1; i>=0; i-- {
-		s.Insert(i,i)
+	for i := b.N - 1; i >= 0; i-- {
+		s.Insert(i, i)
 	}
 	b.StartTimer()
-	for i:=0; i<b.N; i++ {
+	for i := 0; i < b.N; i++ {
 		s.Find(i)
 	}
 }
@@ -249,11 +249,11 @@ func BenchmarkSkiplist_FindForward(b *testing.B) {
 func BenchmarkSkiplist_FindReverse(b *testing.B) {
 	b.StopTimer()
 	s := New(less, nil)
-	for i:=0; i<b.N; i++ {
-		s.Insert(i,i)
+	for i := 0; i < b.N; i++ {
+		s.Insert(i, i)
 	}
 	b.StartTimer()
-	for i:=b.N-1; i>=0; i-- {
+	for i := b.N - 1; i >= 0; i-- {
 		s.Find(i)
 	}
 }
@@ -271,11 +271,11 @@ func BenchmarkSkiplist_FindShuffle(b *testing.B) {
 func BenchmarkSkiplist_FindNForward(b *testing.B) {
 	b.StopTimer()
 	s := New(less, nil)
-	for i:=b.N-1; i>=0; i-- {
-		s.Insert(i,i)
+	for i := b.N - 1; i >= 0; i-- {
+		s.Insert(i, i)
 	}
 	b.StartTimer()
-	for i:=0; i<b.N; i++ {
+	for i := 0; i < b.N; i++ {
 		s.FindN(i)
 	}
 }
@@ -283,11 +283,11 @@ func BenchmarkSkiplist_FindNForward(b *testing.B) {
 func BenchmarkSkiplist_FindNReverse(b *testing.B) {
 	b.StopTimer()
 	s := New(less, nil)
-	for i:=0; i<b.N; i++ {
-		s.Insert(i,i)
+	for i := 0; i < b.N; i++ {
+		s.Insert(i, i)
 	}
 	b.StartTimer()
-	for i:=b.N-1; i>=0; i-- {
+	for i := b.N - 1; i >= 0; i-- {
 		s.FindN(i)
 	}
 }
@@ -305,11 +305,11 @@ func BenchmarkSkiplist_FindNShuffle(b *testing.B) {
 func BenchmarkSkiplist_RemoveForward(b *testing.B) {
 	b.StopTimer()
 	s := New(less, nil)
-	for i:=b.N-1; i>=0; i-- {
-		s.Insert(i,i)
+	for i := b.N - 1; i >= 0; i-- {
+		s.Insert(i, i)
 	}
 	b.StartTimer()
-	for i:=0; i<b.N; i++ {
+	for i := 0; i < b.N; i++ {
 		s.Remove(i)
 	}
 }
@@ -317,11 +317,11 @@ func BenchmarkSkiplist_RemoveForward(b *testing.B) {
 func BenchmarkSkiplist_RemoveReverse(b *testing.B) {
 	b.StopTimer()
 	s := New(less, nil)
-	for i:=0; i<b.N; i++ {
-		s.Insert(i,i)
+	for i := 0; i < b.N; i++ {
+		s.Insert(i, i)
 	}
 	b.StartTimer()
-	for i:=b.N-1; i>=0; i-- {
+	for i := b.N - 1; i >= 0; i-- {
 		s.Remove(i)
 	}
 }
@@ -339,11 +339,11 @@ func BenchmarkSkiplist_RemoveShuffle(b *testing.B) {
 func BenchmarkSkiplist_RemoveNHead(b *testing.B) {
 	b.StopTimer()
 	s := New(less, nil)
-	for i:=b.N-1; i>=0; i-- {
-		s.Insert(i,i)
+	for i := b.N - 1; i >= 0; i-- {
+		s.Insert(i, i)
 	}
 	b.StartTimer()
-	for i:=0; i<b.N; i++ {
+	for i := 0; i < b.N; i++ {
 		s.RemoveN(0)
 	}
 }
@@ -351,11 +351,11 @@ func BenchmarkSkiplist_RemoveNHead(b *testing.B) {
 func BenchmarkSkiplist_RemoveNTail(b *testing.B) {
 	b.StopTimer()
 	s := New(less, nil)
-	for i:=0; i<b.N; i++ {
-		s.Insert(i,i)
+	for i := 0; i < b.N; i++ {
+		s.Insert(i, i)
 	}
 	b.StartTimer()
-	for i:=b.N-1; i>=0; i-- {
+	for i := b.N - 1; i >= 0; i-- {
 		s.RemoveN(i)
 	}
 }
@@ -364,14 +364,14 @@ func BenchmarkSkiplist_RemoveNMid(b *testing.B) {
 	b.StopTimer()
 	s := skiplist(0, b.N-1)
 	b.StartTimer()
-	for i:=b.N-1; i>=0; i-- {
-		s.RemoveN(i/2)
+	for i := b.N - 1; i >= 0; i-- {
+		s.RemoveN(i / 2)
 	}
 }
 
-//
+////////////////////////////////////////////////////////////////
 // Utility functions
-//
+////////////////////////////////////////////////////////////////
 
 // Compare 2 interfaced integers.
 //
@@ -447,4 +447,3 @@ func (l *Skiplist) Visualization() (s string) {
 	}
 	return string(s)
 }
-
