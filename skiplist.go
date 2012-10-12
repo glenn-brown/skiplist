@@ -43,7 +43,7 @@ type Skiplist struct {
 	less  func(a, b interface{}) bool
 	links []link
 	prev  []prev
-	rng *rand.Rand
+	rng   *rand.Rand
 }
 type link struct {
 	to    *Element
@@ -231,7 +231,10 @@ func (l *Skiplist) grow() {
 	}
 }
 
-type prev struct { link *link ; pos int }
+type prev struct {
+	link *link
+	pos  int
+}
 
 // Return the previous links to modify, and the insertion position.
 //
@@ -240,7 +243,7 @@ func (s *Skiplist) prevs(key interface{}) ([]prev, int) {
 	prev := s.prev
 	links := &s.links
 	pos := -1
-	for level := levels-1; level >= 0; level-- {
+	for level := levels - 1; level >= 0; level-- {
 		// Find predecessor link at this level
 		for (*links)[level].to != nil && s.less((*links)[level].to.key, key) {
 			pos += (*links)[level].width
@@ -260,9 +263,9 @@ func (s *Skiplist) prevsN(index int) []prev {
 	prev := s.prev
 	links := &s.links
 	pos := 0
-	for level := levels-1; level >= 0; level-- {
+	for level := levels - 1; level >= 0; level-- {
 		// Find predecessor link at this level
-		for (*links)[level].to != nil && (pos + (*links)[level].width <= index) {
+		for (*links)[level].to != nil && (pos+(*links)[level].width <= index) {
 			pos = pos + (*links)[level].width
 			links = &(*links)[level].to.links
 		}
@@ -277,7 +280,7 @@ func (s *Skiplist) prevsN(index int) []prev {
 //
 func (s *Skiplist) randLevels(max int) int {
 	levels := 1
-	for s.rng.Int63() & 0x8000 != 0 {
+	for s.rng.Int63()&0x8000 != 0 {
 		levels++
 	}
 	if levels > max {
