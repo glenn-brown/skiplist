@@ -1,3 +1,5 @@
+// Copyright 2012 by the Skiplist Authors
+
 // Package skiplist implements an indexable ordered multimap.
 //
 // This skip list implementation is distinguished by supporting index
