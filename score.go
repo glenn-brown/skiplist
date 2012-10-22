@@ -20,7 +20,11 @@
 
 package skiplist
 
-func score(key interface{}, reversed bool) (score float64) {
+type Scorer interface {
+	Score() float64
+}
+
+func score(key interface{}) (score float64) {
     switch t := key.(type) {
     case []byte:
         // only use first 8 bytes
@@ -89,12 +93,8 @@ func score(key interface{}, reversed bool) (score float64) {
     case uintptr:
         score = float64(t)
 
-    case Scorable:
+    case Scorer:
         score = t.Score()
-    }
-
-    if reversed {
-        score = -score
     }
 
     return

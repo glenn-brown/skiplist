@@ -56,6 +56,7 @@ type link struct {
 type Element struct {
 	key   interface{} // private to protect order
 	Value interface{}
+	score float64
 	links []link
 }
 
@@ -96,9 +97,10 @@ func (l *Skiplist) Front() *Element {
 //
 func (l *Skiplist) Insert(key interface{}, value interface{}) *Skiplist {
 	l.grow()
-	prev, pos := l.prevs(key)
+	s := score(key)
+	prev, pos := l.prevs(key, s)
 	nuLevels := l.randLevels(len(l.links))
-	nu := &Element{key, value, make([]link, nuLevels)}
+	nu := &Element{key, value, s, make([]link, nuLevels)}
 	for level := range prev {
 		if level < nuLevels {
 			if level == 0 {
@@ -132,10 +134,11 @@ func (l *Skiplist) Remove(key interface{}) *Element {
 	prev := l.prev
 	// Compute elements preceding the insertion location at each level.
 	links := l.links
+	s := score(key)
 	for level := levels - 1; level >= 0; level-- {
 		ll := &links[level]
 		// Find predecessor link at this level.
-		for ll.to != nil && l.less(ll.to.key, key) {
+		for ll.to != nil && (ll.to.score < s || ll.to.score == s && l.less(ll.to.key, key)) {
 			links = ll.to.links
 			ll = &links[level]
 		}
@@ -144,7 +147,7 @@ func (l *Skiplist) Remove(key interface{}) *Element {
 	}
 	// Verify there is a matching entry to remove.
 	elem := prev[0].link.to
-	if elem == nil || l.less(key, elem.key) {
+	if elem == nil || s < elem.score || s == elem.score && l.less(key, elem.key) {
 		return nil
 	}
 	// At the bottom level, simply unlink the element.
@@ -195,9 +198,10 @@ func (l *Skiplist) RemoveN(index int) *Element {
 // It also returns the current position of the found element, or -1.
 //
 func (l *Skiplist) Find(key interface{}) (e *Element, pos int) {
-	prev, pos := l.prevs(key)
+	s := score(key)
+	prev, pos := l.prevs(key, s)
 	elem := prev[0].link.to
-	if elem == nil || l.less(key, elem.key) {
+	if elem == nil || s < elem.score || s == elem.score && l.less(key, elem.key) {
 		return nil, -1
 	}
 	return elem, pos
@@ -238,14 +242,14 @@ type prev struct {
 
 // Return the previous links to modify, and the insertion position.
 //
-func (l *Skiplist) prevs(key interface{}) ([]prev, int) {
+func (l *Skiplist) prevs(key interface{}, s float64) ([]prev, int) {
 	levels := len(l.links)
 	prev := l.prev
 	links := &l.links
 	pos := -1
 	for level := levels - 1; level >= 0; level-- {
 		// Find predecessor link at this level
-		for (*links)[level].to != nil && l.less((*links)[level].to.key, key) {
+		for (*links)[level].to != nil && ((*links)[level].to.score < s || (*links)[level].to.score == s && l.less((*links)[level].to.key, key)) {
 			pos += (*links)[level].width
 			links = &(*links)[level].to.links
 		}
