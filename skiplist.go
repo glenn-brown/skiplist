@@ -1,5 +1,5 @@
-// Copyright 2012 by the Skiplist Authors
-
+// Copyright 2012 The Skiplist Authors
+//
 // Package skiplist implements an *indexable* ordered map/multimap
 //
 // This skip list has special features:
@@ -118,7 +118,7 @@ func (l *Skiplist) Front() *Element {
 	return l.links[0].to
 }
 
-// Insert a {key,value} pair in the skiplist, optionally replacing the yougest previous entry.
+// Insert a {key,value} pair in the skiplist, optionally replacing the youngest previous entry.
 //
 func (l *Skiplist) insert(key interface{}, value interface{}, replace bool) *Skiplist {
 	l.grow()
@@ -175,7 +175,7 @@ func (l *Skiplist) remove(prev []prev, elem *Element) *Element {
 	levels := len(l.links)
 	for ; level < levels && prev[level].link.to == elem; level++ {
 		prev[level].link.to = elem.links[level].to
-		prev[level].link.width += elem.links[level].width
+		prev[level].link.width += elem.links[level].width - 1
 	}
 	// Adjust widths at higher levels
 	for ; level < levels; level++ {
@@ -204,7 +204,32 @@ func (l *Skiplist) Remove(key interface{}) *Element {
 // This is useful for removing a specific element in a multimap, or removing elements during iteration.
 //
 func (l *Skiplist) RemoveElement(e *Element) *Element {
-	panic ("TODO")
+
+	// Find the first element in the multimap group.
+	
+	k := e.key
+	s := l.score(k)
+	prevs, pos := l.prevs(k, s)
+
+	// Find the position of the matching entry within the multimap group.
+
+	for match:=prevs[0].link.to; nil != match && match != e; match = match.Next() {
+		pos++
+	}
+
+	// Adjust prevs to be relative to the element, not relative to the start of the group.
+
+	levels := len(prevs)
+	for level:=0; level<levels; level++ {
+		for l := prevs[level]; l.pos + l.link.width > pos; {
+			prevs[level].pos = l.pos + l.link.width
+			prevs[level].link = &l.link.to.links[level]
+		}
+	}
+
+	// Remove the element.
+	
+	return l.remove(prevs, e)
 }
 
 // RemoveN removes any element at position pos in O(log(N)) time,
@@ -214,23 +239,9 @@ func (l *Skiplist) RemoveN(index int) *Element {
 	if index >= l.cnt {
 		return nil
 	}
-	prev := l.prevsN(index)
-	elem := prev[0].link.to
-	for level := range l.links {
-		if level < len(elem.links) {
-			if level == 0 {
-				// At the bottom level, simply unlink the element.
-				prev[level].link.to = elem.links[level].to
-				continue
-			}
-			prev[level].link.to = elem.links[level].to
-			prev[level].link.width += elem.links[level].width - 1
-			continue
-		}
-		prev[level].link.width -= 1
-	}
-	l.shrink()
-	return elem
+	prevs := l.prevsN(index)
+	elem := prevs[0].link.to
+	return l.remove(prevs, elem)
 }
 
 // Find returns the youngest element inserted with key in the
