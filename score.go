@@ -20,78 +20,72 @@
 
 package skiplist
 
-func score(key interface{}) (score float64) {
-    switch t := key.(type) {
-    case []byte:
-        // only use first 8 bytes
-        if len(t) > 8 {
-            t = t[:8]
-        }
+func scoreFn(key interface{}) (func(interface{}) float64) {
+    switch key.(type) {
+	case []byte:
+		return func(key interface{}) float64 {
+			t := key.([]byte)
+			// only use first 8 bytes
+			if len(t) > 8 {
+				t = t[:8]
+			}
+			
+			var result uint64
 
-        var result uint64
-
-        for _, v := range t {
-            result |= uint64(v)
-            result = result << 8
-        }
-
-        score = float64(result)
+			for _, v := range t {
+				result |= uint64(v)
+				result = result << 8
+			}
+			return float64(result)
+		}
 
     case float32:
-        score = float64(t)
-
+		return func(t interface{}) float64 { return float64(t.(float32)) }
     case float64:
-        score = t
-
+		return func(t interface{}) float64 { return float64(t.(float64)) }
     case int:
-        score = float64(t)
-
+		return func(t interface{}) float64 { return float64(t.(int)) }
     case int16:
-        score = float64(t)
-
+		return func(t interface{}) float64 { return float64(t.(int16)) }
     case int32:
-        score = float64(t)
-
+		return func(t interface{}) float64 { return float64(t.(int32)) }
     case int64:
-        score = float64(t)
-
+		return func(t interface{}) float64 { return float64(t.(int64)) }
     case int8:
-        score = float64(t)
+		return func(t interface{}) float64 { return float64(t.(int8)) }
 
     case string:
-        // use first 2 runes in string as score
-        var runes uint64
-        length := len(t)
+		return func(key interface{}) float64 {
+			t := key.(string)
+			// use first 2 runes in string as score
+			var runes uint64
+			length := len(t)
 
-        if length == 1 {
-            runes = uint64(t[0]) << 16
-        } else if length >= 2 {
-            runes = uint64(t[0])<<16 + uint64(t[1])
-        }
-
-        score = float64(runes)
+			if length == 1 {
+				runes = uint64(t[0]) << 16
+			} else if length >= 2 {
+				runes = uint64(t[0])<<16 + uint64(t[1])
+			}
+			return float64(runes)
+		}
 
     case uint:
-        score = float64(t)
-
+		return func(t interface{}) float64 { return float64(t.(uint)) }
     case uint16:
-        score = float64(t)
-
+		return func(t interface{}) float64 { return float64(t.(uint16)) }
     case uint32:
-        score = float64(t)
-
+		return func(t interface{}) float64 { return float64(t.(uint32)) }
     case uint64:
-        score = float64(t)
-
+		return func(t interface{}) float64 { return float64(t.(uint64)) }
     case uint8:
-        score = float64(t)
+		return func(t interface{}) float64 { return float64(t.(uint8)) }
 
     case uintptr:
-        score = float64(t)
+		return func(t interface{}) float64 { return float64(t.(uintptr)) }
 
     case FastKey:
-        score = t.Score()
+		return func(t interface{}) float64 { return t.(FastKey).Score() }
     }
 
-    return
+	return func(t interface{}) float64 { return 0.0 }
 }

@@ -57,6 +57,7 @@ type Skiplist struct {
 	links []link
 	prev  []prev
 	rng   *rand.Rand
+	score func(a interface{}) float64
 }
 type link struct {
 	to    *Element
@@ -94,12 +95,16 @@ func New(r *rand.Rand) *Skiplist {
 	if r == nil {
 		r = rand.New(rand.NewSource(42))
 	}
-	nu := &Skiplist{0, nil, []link{}, []prev{}, r}
+	nu := &Skiplist{0, nil, []link{}, []prev{}, r, nil}
 	// Arrange to set the less function the first time it it called.
 	// We can't do it here because we do not yet know the key type.
 	nu.less = func(a, b interface{}) bool {
 		nu.less = lessFn(a)
 		return nu.less(a, b)
+	}
+	nu.score = func(a interface{}) float64 {
+		nu.score = scoreFn(a)
+		return nu.score(a)
 	}
 	return nu
 }
@@ -117,7 +122,7 @@ func (l *Skiplist) Front() *Element {
 //
 func (l *Skiplist) insert(key interface{}, value interface{}, replace bool) *Skiplist {
 	l.grow()
-	s := score(key)
+	s := l.score(key)
 	prev, pos := l.prevs(key, s)
 	next := prev[0].link.to
 	if replace && (s != next.score || s == next.score && (l.less(key, next.key) || l.less(next.key, key))) {
@@ -184,7 +189,7 @@ func (l *Skiplist) remove(prev []prev, elem *Element) *Element {
 // Return the removed element or nil.
 //
 func (l *Skiplist) Remove(key interface{}) *Element {
-	s := score(key)
+	s := l.score(key)
 	prevs, _ := l.prevs(key, s)
 	// Verify there is a matching entry to remove.
 	elem := l.prev[0].link.to
@@ -234,7 +239,7 @@ func (l *Skiplist) RemoveN(index int) *Element {
 // It also returns the current position of the found element, or -1.
 //
 func (l *Skiplist) Find(key interface{}) (e *Element, pos int) {
-	s := score(key)
+	s := l.score(key)
 	prev, pos := l.prevs(key, s)
 	elem := prev[0].link.to
 	if elem == nil || s < elem.score || s == elem.score && l.less(key, elem.key) {
