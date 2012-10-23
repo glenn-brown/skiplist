@@ -1,13 +1,13 @@
 // Copyright 2012 The Skiplist Authors
 //
-// Package skiplist implements an *indexable* ordered map/multimap
+// Package skiplist implements a fast indexable ordered map/multimap
 //
 // This skip list has special features:
 // It supports position-index addressing.
 // It can act as a map or as a multimap.
 // It automatically adjusts its depth.
 // It mimics Go's container/list interface where possible.
-// It automatically supports integer, float, and []byte keys.
+// It automatically and efficiently supports int*, float*, uintptr, string, and []byte keys.
 // It supports external key types via the FastKey and SlowKey interfaces.
 //
 // Set, Get, Insert, and Remove, operations all require O(log(N)) time or less.
@@ -51,6 +51,7 @@ import (
 //   L0 |->|->|->|->|->|->|->|->|->|->|->|->|->|->|->|->|->|->|->|->|->|->|->|->/
 //         0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  1  1  1  1  1  1  1  
 //         0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f  0  1  2  3  4  5  6
+//
 type Skiplist struct {
 	cnt   int
 	less  func(a, b interface{}) bool
@@ -78,7 +79,7 @@ type Element struct {
 //
 func (e *Element) Key() interface{} { return e.key }
 
-// Next returns the next-greater list element or nil.
+// Next returns the next-greater list element or nil in O(1) time.
 //
 func (e *Element) Next() *Element { return e.links[0].to }
 
@@ -87,17 +88,18 @@ func (e *Element) Next() *Element { return e.links[0].to }
 func (e *Element) String() string { return fmt.Sprintf("%v:%v", e.Key(), e.Value) }
 
 // New returns a new skiplist in O(1) time.
-// Function less must return true iff key a is less than key b.
 // The list will be sorted from least to greatest.
-// R is the random number generator to use or nil.
+// R the random number generator to use, or nil to use the default.
 //
 func New(r *rand.Rand) *Skiplist {
 	if r == nil {
 		r = rand.New(rand.NewSource(42))
 	}
 	nu := &Skiplist{0, nil, []link{}, []prev{}, r, nil}
-	// Arrange to set the less function the first time it it called.
+	
+	// Arrange to set nu.less and nu.socre the first time each is called.
 	// We can't do it here because we do not yet know the key type.
+	
 	nu.less = func(a, b interface{}) bool {
 		nu.less = lessFn(a)
 		return nu.less(a, b)
@@ -375,7 +377,7 @@ type SlowKey interface {
 }
 
 // Any type implementing the FastKey interface may be used as a key.
-// a<b => Score(a)<=Score(b)
+// Score(key) must be a monotonically increasing function.
 //
 type FastKey interface {
 	Less(interface{}) bool
