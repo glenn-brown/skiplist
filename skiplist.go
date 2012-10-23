@@ -1,25 +1,37 @@
 // Copyright 2012 by the Skiplist Authors
 
-// Package skiplist implements an indexable ordered multimap.
+// Package skiplist implements an *indexable* ordered map/multimap
 //
-// This skip list implementation is distinguished by supporting index
-// addressing, allowing multiple values per key, automatically
-// adjusting its depth, and mimicing Go's container/list interface
-// where possible.
+// This skip list has special features:
+// It supports position-index addressing.
+// It can act as a map or as a multimap.
+// It automatically adjusts its depth.
+// It mimics Go's container/list interface where possible.
+// It automatically supports integer, float, and []byte keys.
+// It supports external key types via the FastKey and SlowKey interfaces.
 //
-// Insert, Remove, and Find operations all require O(log(N)) time or less.
+// Set, Get, Insert, and Remove, operations all require O(log(N)) time or less.
 // The skiplist requires O(N) space.
 //
 // To efficiently iterate over the list (where s is a *Skiplist):
 //   for e := l.Front(); e != nil; e = e.Next() {
 //  	// do something with e.Value and/or e.Key()
 //   }
-// Pop the first element in the list with l.RemoveN(0).  Pop the last
-// with l.RemoveN(l.Len()-1).
+// Pop the first element in the list with l.RemoveN(0).
+// Pop the last with l.RemoveN(l.Len()-1).
+//
+// To use the skiplist as a Map, mapping each key to a single value, simply avoid the Insert() method.
+//	
+// To use the skiplist as a Multimap, use Insert() instead of Set().
+// To efficiently iterate over all values for a single key:
+//   for e := l.Get(key); e != nil && e.Key() == key; e = e.Next() {
+//     ;
+//   }
 //
 package skiplist
 
 import (
+	"bytes"
 	"fmt"
 	"math/rand"
 )
@@ -39,7 +51,6 @@ import (
 //   L0 |->|->|->|->|->|->|->|->|->|->|->|->|->|->|->|->|->|->|->|->|->|->|->|->/
 //         0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  1  1  1  1  1  1  1  
 //         0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f  0  1  2  3  4  5  6
-
 type Skiplist struct {
 	cnt   int
 	less  func(a, b interface{}) bool
@@ -79,11 +90,18 @@ func (e *Element) String() string { return fmt.Sprintf("%v:%v", e.Key(), e.Value
 // The list will be sorted from least to greatest.
 // R is the random number generator to use or nil.
 //
-func New(less func(key1, key2 interface{}) bool, r *rand.Rand) *Skiplist {
+func New(r *rand.Rand) *Skiplist {
 	if r == nil {
 		r = rand.New(rand.NewSource(42))
 	}
-	return &Skiplist{0, less, []link{}, []prev{}, r}
+	nu := &Skiplist{0, nil, []link{}, []prev{}, r}
+	// Arrange to set the less function the first time it it called.
+	// We can't do it here because we do not yet know the key type.
+	nu.less = func(a, b interface{}) bool {
+		nu.less = lessFn(a)
+		return nu.less(a, b)
+	}
+	return nu
 }
 
 // Return the first list element in O(1) time.
@@ -95,12 +113,16 @@ func (l *Skiplist) Front() *Element {
 	return l.links[0].to
 }
 
-// Insert a {key,value} pair into the skip list in O(log(N)) time.
+// Insert a {key,value} pair in the skiplist, optionally replacing the yougest previous entry.
 //
-func (l *Skiplist) Insert(key interface{}, value interface{}) *Skiplist {
+func (l *Skiplist) insert(key interface{}, value interface{}, replace bool) *Skiplist {
 	l.grow()
 	s := score(key)
 	prev, pos := l.prevs(key, s)
+	next := prev[0].link.to
+	if replace && (s != next.score || s == next.score && (l.less(key, next.key) || l.less(next.key, key))) {
+		l.remove(prev, next)
+	}
 	nuLevels := l.randLevels(len(l.links))
 	nu := &Element{key, value, s, make([]link, nuLevels)}
 	for level := range prev {
@@ -127,35 +149,25 @@ func (l *Skiplist) Insert(key interface{}, value interface{}) *Skiplist {
 	return l
 }
 
-// Remove the youngest Element associate with Key, if any, in O(log(N)) time.
-// Return the removed element or nil.
+// Insert a {key,value} pair into the skip list in O(log(N)) time.
 //
-func (l *Skiplist) Remove(key interface{}) *Element {
-	levels := len(l.links)
-	// Create scratch space to store predecessor information.
-	prev := l.prev
-	// Compute elements preceding the insertion location at each level.
-	links := l.links
-	s := score(key)
-	for level := levels - 1; level >= 0; level-- {
-		ll := &links[level]
-		// Find predecessor link at this level.
-		for ll.to != nil && (ll.to.score < s || ll.to.score == s && l.less(ll.to.key, key)) {
-			links = ll.to.links
-			ll = &links[level]
-		}
-		// Record the predecessor at this level and its position.
-		prev[level].link = ll
-	}
-	// Verify there is a matching entry to remove.
-	elem := prev[0].link.to
-	if elem == nil || s < elem.score || s == elem.score && l.less(key, elem.key) {
-		return nil
-	}
+func (l *Skiplist) Insert(key interface{}, value interface{}) *Skiplist {
+	return l.insert(key, value, false)
+}
+
+// Insert a {key,value} pair into the skip list in O(log(N)) time, replacing the youngest entry
+// for key, if any.
+//
+func (l *Skiplist) Set(key interface{}, value interface{}) *Skiplist {
+	return l.insert(key, value, true)
+}
+
+func (l *Skiplist) remove(prev []prev, elem *Element) *Element {
 	// At the bottom level, simply unlink the element.
 	prev[0].link.to = elem.links[0].to
 	// Unlink any higher linked levels.
 	level := 1
+	levels := len(l.links)
 	for ; level < levels && prev[level].link.to == elem; level++ {
 		prev[level].link.to = elem.links[level].to
 		prev[level].link.width += elem.links[level].width
@@ -166,6 +178,28 @@ func (l *Skiplist) Remove(key interface{}) *Element {
 	}
 	l.shrink()
 	return elem
+}
+
+// Remove the youngest Element associate with Key, if any, in O(log(N)) time.
+// Return the removed element or nil.
+//
+func (l *Skiplist) Remove(key interface{}) *Element {
+	s := score(key)
+	prevs, _ := l.prevs(key, s)
+	// Verify there is a matching entry to remove.
+	elem := l.prev[0].link.to
+	if elem == nil || s != elem.score || s == elem.score && l.less(key, elem.key) {
+		return nil
+	}
+	return l.remove(prevs, elem)
+}
+
+// Remove the specified element from the table, in O(log(N)) time.
+// If the element is one of M multiple entries for the key, and additional O(M) time is required.
+// This is useful for removing a specific element in a multimap, or removing elements during iteration.
+//
+func (l *Skiplist) RemoveElement(e *Element) *Element {
+	panic ("TODO")
 }
 
 // RemoveN removes any element at position pos in O(log(N)) time,
@@ -315,4 +349,52 @@ func (l *Skiplist) String() string {
 	}
 	s[len(s)-1] = '}'
 	return string(s)
+}
+
+// Any type implementing the SlowKey interface may be used as a key,
+// but the FastKey interface is faster.
+//
+type SlowKey interface {
+	Less(interface{}) bool
+}
+
+// Any type implementing the FastKey interface may be used as a key.
+// a<b => Score(a)<=Score(b)
+//
+type FastKey interface {
+	Less(interface{}) bool
+	Score() float64
+}
+
+// Function lessFn returns the comparison function corresponding to the key type.
+//
+func lessFn(key interface{}) func(a,b interface{})bool {
+	switch key.(type) {
+
+		// Support builtin types.
+		
+	case float32 :return func(a,b interface{})bool{return a.(float32)<b.(float32)}
+	case float64 :return func(a,b interface{})bool{return a.(float64)<b.(float64)}
+	case int     :return func(a,b interface{})bool{return a.(int    )<b.(int    )}
+	case int16   :return func(a,b interface{})bool{return a.(int16  )<b.(int16  )}
+	case int32   :return func(a,b interface{})bool{return a.(int32  )<b.(int32  )}
+	case int64   :return func(a,b interface{})bool{return a.(int64  )<b.(int64  )}
+	case int8    :return func(a,b interface{})bool{return a.(int8   )<b.(int8   )}
+	case string  :return func(a,b interface{})bool{return a.(string )<b.(string )}
+	case uint    :return func(a,b interface{})bool{return a.(uint   )<b.(uint   )}
+	case uint16  :return func(a,b interface{})bool{return a.(uint16 )<b.(uint16 )}
+	case uint32  :return func(a,b interface{})bool{return a.(uint32 )<b.(uint32 )}
+	case uint64  :return func(a,b interface{})bool{return a.(uint64 )<b.(uint64 )}
+	case uint8   :return func(a,b interface{})bool{return a.(uint8  )<b.(uint8  )}
+	case uintptr :return func(a,b interface{})bool{return a.(uintptr)<b.(uintptr)}
+
+		// Support go-supplied type that are likely to be used as keys.
+		
+	case []byte  :return func(a,b interface{})bool{return bytes.Compare(a.([]byte),b.([]byte)) < 0}
+
+		// Support types that implement the SlowKey and FastKey interfaces.
+		
+	case SlowKey, FastKey: return func(a,b interface{})bool{return a.(SlowKey).Less(b)}
+	}
+	panic ("skiplist: type T not supported.  Consider adding a Less() method.")
 }

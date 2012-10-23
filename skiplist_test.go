@@ -44,9 +44,9 @@ func TestElement_String(t *testing.T) {
 func TestNew(t *testing.T) {
 	t.Parallel()
 	// Verify the injected random number generator is used.
-	s := New(less, nil)
-	s1 := New(less, rand.New(rand.NewSource(1)))
-	s42 := New(less, rand.New(rand.NewSource(42)))
+	s := New(nil)
+	s1 := New(rand.New(rand.NewSource(1)))
+	s42 := New(rand.New(rand.NewSource(42)))
 	for i := 0; i < 32; i++ {
 		s.Insert(i, i)
 		s1.Insert(i, i)
@@ -173,7 +173,7 @@ func TestSkiplist_FindN(t *testing.T) {
 ////////////////////////////////////////////////////////////////
 
 func ExampleElement_Next() {
-	s := New(less, nil).Insert(0, 0).Insert(1, 2).Insert(2, 4).Insert(3, 6)
+	s := New(nil).Insert(0, 0).Insert(1, 2).Insert(2, 4).Insert(3, 6)
 	for e := s.Front(); e != nil; e = e.Next() {
 		fmt.Print(e, " ")
 	}
@@ -181,13 +181,13 @@ func ExampleElement_Next() {
 }
 
 func ExampleSkiplist_String() {
-	skip := New(less, nil).Insert(1, 10).Insert(2, 20).Insert(3, 30)
+	skip := New(nil).Insert(1, 10).Insert(2, 20).Insert(3, 30)
 	fmt.Println(skip)
 	// Output: {1:10 2:20 3:30}
 }
 
 func ExampleVisualization() {
-	s := New(less, nil)
+	s := New(nil)
 	for i := 0; i < 23; i++ {
 		s.Insert(i, i)
 	}
@@ -208,7 +208,7 @@ func ExampleVisualization() {
 
 func BenchmarkSkiplist_InsertForward(b *testing.B) {
 	b.StopTimer()
-	s := New(less, nil)
+	s := New(nil)
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
 		s.Insert(i, i)
@@ -217,7 +217,7 @@ func BenchmarkSkiplist_InsertForward(b *testing.B) {
 
 func BenchmarkSkiplist_InsertReverse(b *testing.B) {
 	b.StopTimer()
-	s := New(less, nil)
+	s := New(nil)
 	b.StartTimer()
 	for i := b.N - 1; i >= 0; i-- {
 		s.Insert(i, i)
@@ -227,7 +227,7 @@ func BenchmarkSkiplist_InsertReverse(b *testing.B) {
 func BenchmarkSkiplist_InsertShuffle(b *testing.B) {
 	b.StopTimer()
 	a := shuffleRange(0, b.N-1)
-	s := New(less, nil)
+	s := New(nil)
 	b.StartTimer()
 	for i, key := range a {
 		s.Insert(key, i)
@@ -236,7 +236,7 @@ func BenchmarkSkiplist_InsertShuffle(b *testing.B) {
 
 func BenchmarkSkiplist_FindForward(b *testing.B) {
 	b.StopTimer()
-	s := New(less, nil)
+	s := New(nil)
 	for i := b.N - 1; i >= 0; i-- {
 		s.Insert(i, i)
 	}
@@ -248,7 +248,7 @@ func BenchmarkSkiplist_FindForward(b *testing.B) {
 
 func BenchmarkSkiplist_FindReverse(b *testing.B) {
 	b.StopTimer()
-	s := New(less, nil)
+	s := New(nil)
 	for i := 0; i < b.N; i++ {
 		s.Insert(i, i)
 	}
@@ -270,7 +270,7 @@ func BenchmarkSkiplist_FindShuffle(b *testing.B) {
 
 func BenchmarkSkiplist_FindNForward(b *testing.B) {
 	b.StopTimer()
-	s := New(less, nil)
+	s := New(nil)
 	for i := b.N - 1; i >= 0; i-- {
 		s.Insert(i, i)
 	}
@@ -282,7 +282,7 @@ func BenchmarkSkiplist_FindNForward(b *testing.B) {
 
 func BenchmarkSkiplist_FindNReverse(b *testing.B) {
 	b.StopTimer()
-	s := New(less, nil)
+	s := New(nil)
 	for i := 0; i < b.N; i++ {
 		s.Insert(i, i)
 	}
@@ -304,7 +304,7 @@ func BenchmarkSkiplist_FindNShuffle(b *testing.B) {
 
 func BenchmarkSkiplist_RemoveForward(b *testing.B) {
 	b.StopTimer()
-	s := New(less, nil)
+	s := New(nil)
 	for i := b.N - 1; i >= 0; i-- {
 		s.Insert(i, i)
 	}
@@ -316,7 +316,7 @@ func BenchmarkSkiplist_RemoveForward(b *testing.B) {
 
 func BenchmarkSkiplist_RemoveReverse(b *testing.B) {
 	b.StopTimer()
-	s := New(less, nil)
+	s := New(nil)
 	for i := 0; i < b.N; i++ {
 		s.Insert(i, i)
 	}
@@ -338,7 +338,7 @@ func BenchmarkSkiplist_RemoveShuffle(b *testing.B) {
 
 func BenchmarkSkiplist_RemoveNHead(b *testing.B) {
 	b.StopTimer()
-	s := New(less, nil)
+	s := New(nil)
 	for i := b.N - 1; i >= 0; i-- {
 		s.Insert(i, i)
 	}
@@ -350,7 +350,7 @@ func BenchmarkSkiplist_RemoveNHead(b *testing.B) {
 
 func BenchmarkSkiplist_RemoveNTail(b *testing.B) {
 	b.StopTimer()
-	s := New(less, nil)
+	s := New(nil)
 	for i := 0; i < b.N; i++ {
 		s.Insert(i, i)
 	}
@@ -373,12 +373,6 @@ func BenchmarkSkiplist_RemoveNMid(b *testing.B) {
 // Utility functions
 ////////////////////////////////////////////////////////////////
 
-// Compare 2 interfaced integers.
-//
-func less(a, b interface{}) bool {
-	return a.(int) < b.(int)
-}
-
 // Create a shuffled slice of the integers in [min,max].
 //
 func shuffleRange(min, max int) []int {
@@ -396,7 +390,7 @@ func shuffleRange(min, max int) []int {
 // Create a Skiplist with each key in [min,max].
 //
 func skiplist(min, max int) *Skiplist {
-	s := New(less, nil)
+	s := New(nil)
 	for _, v := range shuffleRange(min, max) {
 		s.Insert(v, 2*v)
 	}

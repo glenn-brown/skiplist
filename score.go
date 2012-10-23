@@ -20,10 +20,6 @@
 
 package skiplist
 
-type Scorer interface {
-	Score() float64
-}
-
 func score(key interface{}) (score float64) {
     switch t := key.(type) {
     case []byte:
@@ -93,7 +89,7 @@ func score(key interface{}) (score float64) {
     case uintptr:
         score = float64(t)
 
-    case Scorer:
+    case FastKey:
         score = t.Score()
     }
 
