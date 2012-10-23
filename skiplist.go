@@ -7,11 +7,12 @@
 // It can act as a map or as a multimap.
 // It automatically adjusts its depth.
 // It mimics Go's container/list interface where possible.
-// It automatically and efficiently supports int*, float*, uintptr, string, and []byte keys.
-// It supports external key types via the FastKey and SlowKey interfaces.
+// It automatically and efficiently supports int*, float*, uint*, string, and []byte keys.
+// It supports externally defined key types via the FastKey and SlowKey interfaces.
 //
-// Set, Get, Insert, and Remove, operations all require O(log(N)) time or less.
-// The skiplist requires O(N) space.
+// Set, Get*, Insert, and Remove*, operations all require O(log(N))
+// time or less, where N is the number of entries in the list.  The
+// skiplist requires O(N) space.
 //
 // To efficiently iterate over the list (where s is a *Skiplist):
 //   for e := l.Front(); e != nil; e = e.Next() {
