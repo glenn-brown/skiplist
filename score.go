@@ -26,6 +26,11 @@ package skiplist
 
 func scoreFn(key interface{}) (func(interface{}) float64) {
     switch key.(type) {
+	case FastKey:
+		return func(t interface{}) float64 { return t.(FastKey).Score() }
+	case SlowKey:
+		return func(t interface{}) float64 { return 0.0 }
+		
 	case []byte:
 		return func(key interface{}) float64 {
 			t := key.([]byte)
@@ -86,9 +91,6 @@ func scoreFn(key interface{}) (func(interface{}) float64) {
 
     case uintptr:
 		return func(t interface{}) float64 { return float64(t.(uintptr)) }
-
-    case FastKey:
-		return func(t interface{}) float64 { return t.(FastKey).Score() }
     }
 
 	return func(t interface{}) float64 { return 0.0 }
