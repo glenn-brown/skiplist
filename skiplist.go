@@ -96,10 +96,10 @@ func New(r *rand.Rand) *Skiplist {
 		r = rand.New(rand.NewSource(42))
 	}
 	nu := &Skiplist{0, nil, []link{}, []prev{}, r, nil}
-	
+
 	// Arrange to set nu.less and nu.socre the first time each is called.
 	// We can't do it here because we do not yet know the key type.
-	
+
 	nu.less = func(a, b interface{}) bool {
 		nu.less = lessFn(a)
 		return nu.less(a, b)
@@ -208,29 +208,29 @@ func (l *Skiplist) Remove(key interface{}) *Element {
 func (l *Skiplist) RemoveElement(e *Element) *Element {
 
 	// Find the first element in the multimap group.
-	
+
 	k := e.key
 	s := l.score(k)
 	prevs, pos := l.prevs(k, s)
 
 	// Find the position of the matching entry within the multimap group.
 
-	for match:=prevs[0].link.to; nil != match && match != e; match = match.Next() {
+	for match := prevs[0].link.to; nil != match && match != e; match = match.Next() {
 		pos++
 	}
 
 	// Adjust prevs to be relative to the element, not relative to the start of the group.
 
 	levels := len(prevs)
-	for level:=0; level<levels; level++ {
-		for l := prevs[level]; l.pos + l.link.width > pos; {
+	for level := 0; level < levels; level++ {
+		for l := prevs[level]; l.pos+l.link.width > pos; {
 			prevs[level].pos = l.pos + l.link.width
 			prevs[level].link = &l.link.to.links[level]
 		}
 	}
 
 	// Remove the element.
-	
+
 	return l.remove(prevs, e)
 }
 
@@ -386,33 +386,49 @@ type FastKey interface {
 
 // Function lessFn returns the comparison function corresponding to the key type.
 //
-func lessFn(key interface{}) func(a,b interface{})bool {
+func lessFn(key interface{}) func(a, b interface{}) bool {
 	switch key.(type) {
 
-		// Support builtin types.
-		
-	case float32 :return func(a,b interface{})bool{return a.(float32)<b.(float32)}
-	case float64 :return func(a,b interface{})bool{return a.(float64)<b.(float64)}
-	case int     :return func(a,b interface{})bool{return a.(int    )<b.(int    )}
-	case int16   :return func(a,b interface{})bool{return a.(int16  )<b.(int16  )}
-	case int32   :return func(a,b interface{})bool{return a.(int32  )<b.(int32  )}
-	case int64   :return func(a,b interface{})bool{return a.(int64  )<b.(int64  )}
-	case int8    :return func(a,b interface{})bool{return a.(int8   )<b.(int8   )}
-	case string  :return func(a,b interface{})bool{return a.(string )<b.(string )}
-	case uint    :return func(a,b interface{})bool{return a.(uint   )<b.(uint   )}
-	case uint16  :return func(a,b interface{})bool{return a.(uint16 )<b.(uint16 )}
-	case uint32  :return func(a,b interface{})bool{return a.(uint32 )<b.(uint32 )}
-	case uint64  :return func(a,b interface{})bool{return a.(uint64 )<b.(uint64 )}
-	case uint8   :return func(a,b interface{})bool{return a.(uint8  )<b.(uint8  )}
-	case uintptr :return func(a,b interface{})bool{return a.(uintptr)<b.(uintptr)}
+	// Support builtin types.
+
+	case float32:
+		return func(a, b interface{}) bool { return a.(float32) < b.(float32) }
+	case float64:
+		return func(a, b interface{}) bool { return a.(float64) < b.(float64) }
+	case int:
+		return func(a, b interface{}) bool { return a.(int) < b.(int) }
+	case int16:
+		return func(a, b interface{}) bool { return a.(int16) < b.(int16) }
+	case int32:
+		return func(a, b interface{}) bool { return a.(int32) < b.(int32) }
+	case int64:
+		return func(a, b interface{}) bool { return a.(int64) < b.(int64) }
+	case int8:
+		return func(a, b interface{}) bool { return a.(int8) < b.(int8) }
+	case string:
+		return func(a, b interface{}) bool { return a.(string) < b.(string) }
+	case uint:
+		return func(a, b interface{}) bool { return a.(uint) < b.(uint) }
+	case uint16:
+		return func(a, b interface{}) bool { return a.(uint16) < b.(uint16) }
+	case uint32:
+		return func(a, b interface{}) bool { return a.(uint32) < b.(uint32) }
+	case uint64:
+		return func(a, b interface{}) bool { return a.(uint64) < b.(uint64) }
+	case uint8:
+		return func(a, b interface{}) bool { return a.(uint8) < b.(uint8) }
+	case uintptr:
+		return func(a, b interface{}) bool { return a.(uintptr) < b.(uintptr) }
 
 		// Support go-supplied type that are likely to be used as keys.
-		
-	case []byte  :return func(a,b interface{})bool{return bytes.Compare(a.([]byte),b.([]byte)) < 0}
+
+	case []byte:
+		return func(a, b interface{}) bool { return bytes.Compare(a.([]byte), b.([]byte)) < 0 }
 
 		// Support types that implement the SlowKey and FastKey interfaces.
-		
-	case SlowKey, FastKey: return func(a,b interface{})bool{return a.(SlowKey).Less(b)}
+
+	case SlowKey, FastKey:
+		return func(a, b interface{}) bool { return a.(SlowKey).Less(b) }
 	}
-	panic ("skiplist: type T not supported.  Consider adding a Less() method.")
+	panic("skiplist: type T not supported.  Consider adding a Less() method.")
 }

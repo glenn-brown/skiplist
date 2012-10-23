@@ -24,13 +24,13 @@
 
 package skiplist
 
-func scoreFn(key interface{}) (func(interface{}) float64) {
-    switch key.(type) {
+func scoreFn(key interface{}) func(interface{}) float64 {
+	switch key.(type) {
 	case FastKey:
 		return func(t interface{}) float64 { return t.(FastKey).Score() }
 	case SlowKey:
 		return func(t interface{}) float64 { return 0.0 }
-		
+
 	case []byte:
 		return func(key interface{}) float64 {
 			t := key.([]byte)
@@ -38,7 +38,7 @@ func scoreFn(key interface{}) (func(interface{}) float64) {
 			if len(t) > 8 {
 				t = t[:8]
 			}
-			
+
 			var result uint64
 
 			for _, v := range t {
@@ -48,22 +48,22 @@ func scoreFn(key interface{}) (func(interface{}) float64) {
 			return float64(result)
 		}
 
-    case float32:
+	case float32:
 		return func(t interface{}) float64 { return float64(t.(float32)) }
-    case float64:
+	case float64:
 		return func(t interface{}) float64 { return float64(t.(float64)) }
-    case int:
+	case int:
 		return func(t interface{}) float64 { return float64(t.(int)) }
-    case int16:
+	case int16:
 		return func(t interface{}) float64 { return float64(t.(int16)) }
-    case int32:
+	case int32:
 		return func(t interface{}) float64 { return float64(t.(int32)) }
-    case int64:
+	case int64:
 		return func(t interface{}) float64 { return float64(t.(int64)) }
-    case int8:
+	case int8:
 		return func(t interface{}) float64 { return float64(t.(int8)) }
 
-    case string:
+	case string:
 		return func(key interface{}) float64 {
 			t := key.(string)
 			// use first 2 runes in string as score
@@ -78,20 +78,20 @@ func scoreFn(key interface{}) (func(interface{}) float64) {
 			return float64(runes)
 		}
 
-    case uint:
+	case uint:
 		return func(t interface{}) float64 { return float64(t.(uint)) }
-    case uint16:
+	case uint16:
 		return func(t interface{}) float64 { return float64(t.(uint16)) }
-    case uint32:
+	case uint32:
 		return func(t interface{}) float64 { return float64(t.(uint32)) }
-    case uint64:
+	case uint64:
 		return func(t interface{}) float64 { return float64(t.(uint64)) }
-    case uint8:
+	case uint8:
 		return func(t interface{}) float64 { return float64(t.(uint8)) }
 
-    case uintptr:
+	case uintptr:
 		return func(t interface{}) float64 { return float64(t.(uintptr)) }
-    }
+	}
 
 	return func(t interface{}) float64 { return 0.0 }
 }
