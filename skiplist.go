@@ -76,17 +76,17 @@ type Element struct {
 	links []link
 }
 
-// Key returns the key used to insert the value in the list element.
+// Key returns the key used to insert the value in the list element in O(1) time.
 //
 func (e *Element) Key() interface{} { return e.key }
 
-// Next returns the next-greater list element or nil in O(1) time.
+// Next returns the next-higher-indexed list element or nil in O(1) time.
 //
 func (e *Element) Next() *Element { return e.links[0].to }
 
 // String returns a Key:Value string representation.
 //
-func (e *Element) String() string { return fmt.Sprintf("%v:%v", e.Key(), e.Value) }
+func (e *Element) String() string { return fmt.Sprintf("%v:%v", e.key, e.Value) }
 
 // New returns a new skiplist in O(1) time.
 // The list will be sorted from least to greatest key.
@@ -182,6 +182,33 @@ func (l *Skiplist) insert(key interface{}, value interface{}, replace bool) *Ski
 //
 func (l *Skiplist) Insert(key interface{}, value interface{}) *Skiplist {
 	return l.insert(key, value, false)
+}
+
+// Map returns the value corresponding to key in the table in O(log(N)) time.
+// If there is no corresponding value, nil is returned.
+// If there are multiple corresponding values, the youngest is returned.
+//
+func (l *Skiplist) Map(key interface{}) (value interface{}) {
+	e, _ := l.Get(key)
+	if nil == e {
+		return nil
+	}
+	return e.Value;
+}
+
+// Multimap returns all values coresponding to key in the list, starting with the youngest.
+// If no value corresponds, an empty slice is returned.
+// O(log(N)+V) time is required, where M is the number of values returned.
+//
+func (l *Skiplist) Multimap(key interface{}) (values []interface{}) {
+	s := l.score(key);
+	prevs, _ := l.prevs(key, s)
+	e := prevs[0].link.to
+	for nil != e && e.score == s && !l.less(e.key, key) {
+		values = append(values, e.Value)
+		e = e.links[0].to
+	}
+	return values
 }
 
 // Insert a {key,value} pair into the skip list in O(log(N)) time, replacing the youngest entry
