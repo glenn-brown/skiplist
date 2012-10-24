@@ -91,7 +91,7 @@ func New(r *rand.Rand) *Skiplist {
 	}
 	nu := &Skiplist{0, nil, []link{}, []prev{}, r, nil}
 
-	// Arrange to set nu.less and nu.socre the first time each is called.
+	// Arrange to set nu.less and nu.score the first time each is called.
 	// We can't do it here because we do not yet know the key type.
 
 	nu.less = func(a, b interface{}) bool {
