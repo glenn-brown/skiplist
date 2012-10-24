@@ -2,7 +2,7 @@
 //
 // Package skiplist implements a fast indexable ordered map/multimap
 //
-// This skip list has special features:
+// This skip list has some features that make it special:
 // It supports position-index addressing.
 // It can act as a map or as a multimap.
 // It automatically adjusts its depth.
@@ -89,7 +89,7 @@ func (e *Element) Next() *Element { return e.links[0].to }
 func (e *Element) String() string { return fmt.Sprintf("%v:%v", e.Key(), e.Value) }
 
 // New returns a new skiplist in O(1) time.
-// The list will be sorted from least to greatest.
+// The list will be sorted from least to greatest key.
 // R the random number generator to use, or nil to use the default.
 //
 func New(r *rand.Rand) *Skiplist {
@@ -107,6 +107,27 @@ func New(r *rand.Rand) *Skiplist {
 	}
 	nu.score = func(a interface{}) float64 {
 		nu.score = scoreFn(a)
+		return nu.score(a)
+	}
+	return nu
+}
+
+// NewDescending is like New, except that key sorting is reversed.
+func NewDescending(r *rand.Rand) *Skiplist {
+	if r == nil {
+		r = rand.New(rand.NewSource(42))
+	}
+	nu := &Skiplist{0, nil, []link{}, []prev{}, r, nil}
+
+	// Arrange to set nu.less and nu.socre the first time each is called.
+	// We can't do it here because we do not yet know the key type.
+
+	nu.less = func(a, b interface{}) bool {
+		nu.less = greaterFn(a, true)
+		return nu.less(a, b)
+	}
+	nu.score = func(a interface{}) float64 {
+		nu.score = negativeScoreFn(a)
 		return nu.score(a)
 	}
 	return nu
@@ -433,4 +454,54 @@ func lessFn(key interface{}) func(a, b interface{}) bool {
 		return func(a, b interface{}) bool { return bytes.Compare(a.([]byte), b.([]byte)) < 0 }
 	}
 	panic("skiplist: type T not supported.  Consider adding a Less() method.")
+}
+
+// Function greaterFn is like lessFn, with inputs reversed.
+//
+func greaterFn(key interface{}, descending bool) func(a, b interface{}) bool {
+	switch key.(type) {
+
+		// Interface types come first to override builtin types when
+		// the interface is present.
+
+	case FastKey, SlowKey:
+		return func(a, b interface{}) bool { return b.(SlowKey).Less(a) }
+
+		// Support builtin types.
+
+	case float32:
+		return func(a, b interface{}) bool { return b.(float32) < a.(float32) }
+	case float64:
+		return func(a, b interface{}) bool { return b.(float64) < a.(float64) }
+	case int:
+		return func(a, b interface{}) bool { return b.(int) < a.(int) }
+	case int16:
+		return func(a, b interface{}) bool { return b.(int16) < a.(int16) }
+	case int32:
+		return func(a, b interface{}) bool { return b.(int32) < a.(int32) }
+	case int64:
+		return func(a, b interface{}) bool { return b.(int64) < a.(int64) }
+	case int8:
+		return func(a, b interface{}) bool { return b.(int8) < a.(int8) }
+	case string:
+		return func(a, b interface{}) bool { return b.(string) < a.(string) }
+	case uint:
+		return func(a, b interface{}) bool { return b.(uint) < a.(uint) }
+	case uint16:
+		return func(a, b interface{}) bool { return b.(uint16) < a.(uint16) }
+	case uint32:
+		return func(a, b interface{}) bool { return b.(uint32) < a.(uint32) }
+	case uint64:
+		return func(a, b interface{}) bool { return b.(uint64) < a.(uint64) }
+	case uint8:
+		return func(a, b interface{}) bool { return b.(uint8) < a.(uint8) }
+	case uintptr:
+		return func(a, b interface{}) bool { return b.(uintptr) < a.(uintptr) }
+
+		// Support go-supplied type that are likely to be used as keys.
+
+	case []byte:
+		return func(a, b interface{}) bool { return bytes.Compare(b.([]byte), a.([]byte)) < 0 }
+	}
+	panic("skiplist: type T not supported.  Consider adding a Less(interface{})bool method.")
 }
