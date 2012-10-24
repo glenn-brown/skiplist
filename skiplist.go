@@ -106,13 +106,14 @@ func New(r *rand.Rand) *Skiplist {
 }
 
 // NewDescending is like New, except keys are sorted from greatest to least.
+//
 func NewDescending(r *rand.Rand) *Skiplist {
 	if r == nil {
 		r = rand.New(rand.NewSource(42))
 	}
 	nu := &Skiplist{0, nil, []link{}, []prev{}, r, nil}
 
-	// Arrange to set nu.less and nu.socre the first time each is called.
+	// Arrange to set nu.less and nu.score the first time each is called.
 	// We can't do it here because we do not yet know the key type.
 
 	nu.less = func(a, b interface{}) bool {
@@ -211,6 +212,9 @@ func (l *Skiplist) Set(key interface{}, value interface{}) *Skiplist {
 	return l.insert(key, value, true)
 }
 
+// Function remove removes Element elem from a list.  Parameter prevs must be
+// the precomputed predecessor list for the element.
+//
 func (l *Skiplist) remove(prev []prev, elem *Element) *Element {
 	// At the bottom level, simply unlink the element.
 	prev[0].link.to = elem.links[0].to
@@ -292,6 +296,8 @@ func (l *Skiplist) RemoveN(index int) *Element {
 // skiplist, without modifying the list, in O(log(N)) time.
 // If there is no match, nil is returned.
 // It also returns the current position of the found element, or -1.
+//
+// Consider using Map or Multimap instead if you only want Values.
 //
 func (l *Skiplist) Get(key interface{}) (e *Element, pos int) {
 	s := l.score(key)
