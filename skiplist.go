@@ -77,7 +77,7 @@ func (e *Element) Key() interface{} { return e.key }
 //
 func (e *Element) Next() *Element { return e.links[0].to }
 
-// String returns a Key:Value string representation.
+// String returns a Key:Value string representation of the element.
 //
 func (e *Element) String() string { return fmt.Sprintf("%v:%v", e.key, e.Value) }
 
@@ -105,7 +105,7 @@ func New(r *rand.Rand) *Skiplist {
 	return nu
 }
 
-// NewDescending is like New, except that key sorting is reversed.
+// NewDescending is like New, except keys are sorted from greatest to least.
 func NewDescending(r *rand.Rand) *Skiplist {
 	if r == nil {
 		r = rand.New(rand.NewSource(42))
@@ -412,14 +412,15 @@ func (l *Skiplist) String() string {
 }
 
 // Any type implementing the SlowKey interface may be used as a key,
-// but the FastKey interface is faster.
+// but the FastKey interface is faster.  a.Less(b) should return true
+// iff key a is less than key b.
 //
 type SlowKey interface {
 	Less(interface{}) bool
 }
 
 // Any type implementing the FastKey interface may be used as a key.
-// Score(key) must be a monotonically increasing function.
+// key.Score() must increase monotonically as key increases.
 //
 type FastKey interface {
 	Less(interface{}) bool
@@ -476,7 +477,7 @@ func lessFn(key interface{}) func(a, b interface{}) bool {
 	panic("skiplist: type T not supported.  Consider adding a Less() method.")
 }
 
-// Function greaterFn is like lessFn, with inputs reversed.
+// Function lessFn returns the comparison function corresponding to the key type.
 //
 func greaterFn(key interface{}, descending bool) func(a, b interface{}) bool {
 	switch key.(type) {
