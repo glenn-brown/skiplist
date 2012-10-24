@@ -247,12 +247,12 @@ func (l *Skiplist) RemoveN(index int) *Element {
 	return l.remove(prevs, elem)
 }
 
-// Find returns the youngest element inserted with key in the
+// Get returns the youngest element inserted with key in the
 // skiplist, without modifying the list, in O(log(N)) time.
 // If there is no match, nil is returned.
 // It also returns the current position of the found element, or -1.
 //
-func (l *Skiplist) Find(key interface{}) (e *Element, pos int) {
+func (l *Skiplist) Get(key interface{}) (e *Element, pos int) {
 	s := l.score(key)
 	prev, pos := l.prevs(key, s)
 	elem := prev[0].link.to
@@ -268,10 +268,10 @@ func (l *Skiplist) Len() int {
 	return l.cnt
 }
 
-// FindN returns the Element at position pos in the skiplist, in O(log(index)) time.
+// GetN returns the Element at position pos in the skiplist, in O(log(index)) time.
 // If no such entry exists, nil is returned.
 //
-func (l *Skiplist) FindN(index int) *Element {
+func (l *Skiplist) GetN(index int) *Element {
 	if index >= l.cnt {
 		return nil
 	}
@@ -390,7 +390,13 @@ type FastKey interface {
 func lessFn(key interface{}) func(a, b interface{}) bool {
 	switch key.(type) {
 
-	// Support builtin types.
+		// Interface types come first to override builtin types when
+		// the interface is present.
+
+	case FastKey, SlowKey:
+		return func(a, b interface{}) bool { return a.(SlowKey).Less(b) }
+
+		// Support builtin types.
 
 	case float32:
 		return func(a, b interface{}) bool { return a.(float32) < b.(float32) }
@@ -425,11 +431,6 @@ func lessFn(key interface{}) func(a, b interface{}) bool {
 
 	case []byte:
 		return func(a, b interface{}) bool { return bytes.Compare(a.([]byte), b.([]byte)) < 0 }
-
-		// Support types that implement the SlowKey and FastKey interfaces.
-
-	case SlowKey, FastKey:
-		return func(a, b interface{}) bool { return a.(SlowKey).Less(b) }
 	}
 	panic("skiplist: type T not supported.  Consider adding a Less() method.")
 }

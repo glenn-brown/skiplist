@@ -108,7 +108,7 @@ func TestSkiplist_RemoveN(t *testing.T) {
 	keys := shuffleRange(0, 10)
 	cnt := 11
 	for _, key := range keys {
-		found, pos := s.Find(key)
+		found, pos := s.Get(key)
 		t.Logf("Removing key=%v at pos=%v", key, pos)
 		t.Log(key, found, pos)
 		t.Log("\n" + s.Visualization())
@@ -134,10 +134,10 @@ func TestSkiplist_FindForward(t *testing.T) {
 	t.Parallel()
 	s := skiplist(0, 9)
 	for i := s.Len() - 1; i >= 0; i-- {
-		e, pos := s.Find(i)
+		e, pos := s.Get(i)
 		if e == nil {
 			t.Error("nil")
-		} else if e != s.FindN(pos) {
+		} else if e != s.GetN(pos) {
 			t.Error("bad pos")
 		} else if e.Key().(int) != i {
 			t.Error("bad Key")
@@ -159,7 +159,7 @@ func TestSkiplist_FindN(t *testing.T) {
 	t.Parallel()
 	s := skiplist(0, 9)
 	for i := s.Len() - 1; i >= 0; i-- {
-		e := s.FindN(i)
+		e := s.GetN(i)
 		if e == nil {
 			t.Error("nil")
 		} else if e.Key().(int) != i {
@@ -244,7 +244,7 @@ func BenchmarkSkiplist_FindForward(b *testing.B) {
 	}
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
-		s.Find(i)
+		s.Get(i)
 	}
 }
 
@@ -256,7 +256,7 @@ func BenchmarkSkiplist_FindReverse(b *testing.B) {
 	}
 	b.StartTimer()
 	for i := b.N - 1; i >= 0; i-- {
-		s.Find(i)
+		s.Get(i)
 	}
 }
 
@@ -266,7 +266,7 @@ func BenchmarkSkiplist_FindShuffle(b *testing.B) {
 	s := skiplist(0, b.N-1)
 	b.StartTimer()
 	for _, key := range a {
-		s.Find(key)
+		s.Get(key)
 	}
 }
 
@@ -278,7 +278,7 @@ func BenchmarkSkiplist_FindNForward(b *testing.B) {
 	}
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
-		s.FindN(i)
+		s.GetN(i)
 	}
 }
 
@@ -290,7 +290,7 @@ func BenchmarkSkiplist_FindNReverse(b *testing.B) {
 	}
 	b.StartTimer()
 	for i := b.N - 1; i >= 0; i-- {
-		s.FindN(i)
+		s.GetN(i)
 	}
 }
 
@@ -300,7 +300,7 @@ func BenchmarkSkiplist_FindNShuffle(b *testing.B) {
 	s := skiplist(0, b.N-1)
 	b.StartTimer()
 	for _, key := range a {
-		s.FindN(key)
+		s.GetN(key)
 	}
 }
 
