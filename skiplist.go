@@ -10,7 +10,7 @@
 // It automatically and efficiently supports int*, float*, uint*, string, and []byte keys.
 // It supports externally defined key types via the FastKey and SlowKey interfaces.
 //
-// Map, Set, Get*, Insert, and Remove* operations all require
+// Map, Set, Element*, Insert, and Remove* operations all require
 // O(log(N)) time or less, where N is the number of entries in the
 // list.  Multimap() requires O(log(N)+V) time where V is the number
 // of values returned. The skiplist requires O(N) space.
@@ -37,7 +37,8 @@ import (
 // associated 'width' specifying the number of nodes it skips, so
 // nodes can also be referenced by position.
 //
-// For example, here is a 24-entry skip list:
+// For example, a skiplist containing values from 0 to 0x16 might be structured
+// like this:
 //   L4 |---------------------------------------------------------------------->/
 //   L3 |------------------------------------------->|------------------------->/
 //   L2 |---------->|---------->|---------->|------->|---------------->|---->|->/
@@ -45,6 +46,9 @@ import (
 //   L0 |->|->|->|->|->|->|->|->|->|->|->|->|->|->|->|->|->|->|->|->|->|->|->|->/
 //         0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  1  1  1  1  1  1  1  
 //         0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f  0  1  2  3  4  5  6
+// The skiplist is searched starting at the top level, going as far right as possible
+// without passing the desired Element, dropping down one level, and repeating for 
+// each level.	
 //
 type Skiplist struct {
 	cnt   int
@@ -183,11 +187,11 @@ func (l *Skiplist) Insert(key interface{}, value interface{}) *Skiplist {
 // If there are multiple corresponding values, the youngest is returned.
 //
 func (l *Skiplist) Map(key interface{}) (value interface{}) {
-	e, _ := l.Get(key)
+	e, _ := l.Element(key)
 	if nil == e {
 		return nil
 	}
-	return e.Value;
+	return e.Value
 }
 
 // Multimap returns all values coresponding to key in the list, starting with the youngest.
@@ -195,7 +199,7 @@ func (l *Skiplist) Map(key interface{}) (value interface{}) {
 // O(log(N)+V) time is required, where M is the number of values returned.
 //
 func (l *Skiplist) Multimap(key interface{}) (values []interface{}) {
-	s := l.score(key);
+	s := l.score(key)
 	prevs, _ := l.prevs(key, s)
 	e := prevs[0].link.to
 	for nil != e && e.score == s && !l.less(e.key, key) {
@@ -292,14 +296,14 @@ func (l *Skiplist) RemoveN(index int) *Element {
 	return l.remove(prevs, elem)
 }
 
-// Get returns the youngest element inserted with key in the
+// Element returns the youngest element inserted with key in the
 // skiplist, without modifying the list, in O(log(N)) time.
 // If there is no match, nil is returned.
 // It also returns the current position of the found element, or -1.
 //
 // Consider using Map or Multimap instead if you only want Values.
 //
-func (l *Skiplist) Get(key interface{}) (e *Element, pos int) {
+func (l *Skiplist) Element(key interface{}) (e *Element, pos int) {
 	s := l.score(key)
 	prev, pos := l.prevs(key, s)
 	elem := prev[0].link.to
@@ -315,10 +319,10 @@ func (l *Skiplist) Len() int {
 	return l.cnt
 }
 
-// GetN returns the Element at position pos in the skiplist, in O(log(index)) time.
+// ElementN returns the Element at position pos in the skiplist, in O(log(index)) time.
 // If no such entry exists, nil is returned.
 //
-func (l *Skiplist) GetN(index int) *Element {
+func (l *Skiplist) ElementN(index int) *Element {
 	if index >= l.cnt {
 		return nil
 	}
@@ -417,15 +421,15 @@ func (l *Skiplist) String() string {
 	return string(s)
 }
 
-// Any type implementing the SlowKey interface may be used as a key,
-// but the FastKey interface is faster.  a.Less(b) should return true
-// iff key a is less than key b.
+// The SlowKey interface allows externally-defined types to be used 
+// as keys.  An a.Less(b) call should return true iff a < b.
 //
 type SlowKey interface {
 	Less(interface{}) bool
 }
 
-// Any type implementing the FastKey interface may be used as a key.
+// The FastKey interface allows externally-defined types to be used
+// as keys, efficiently.  An a.Less(b) call should return true iff a < b.
 // key.Score() must increase monotonically as key increases.
 //
 type FastKey interface {
@@ -438,8 +442,8 @@ type FastKey interface {
 func lessFn(key interface{}) func(a, b interface{}) bool {
 	switch key.(type) {
 
-		// Interface types come first to override builtin types when
-		// the interface is present.
+	// Interface types come first to override builtin types when
+	// the interface is present.
 
 	case FastKey, SlowKey:
 		return func(a, b interface{}) bool { return a.(SlowKey).Less(b) }
@@ -488,8 +492,8 @@ func lessFn(key interface{}) func(a, b interface{}) bool {
 func greaterFn(key interface{}, descending bool) func(a, b interface{}) bool {
 	switch key.(type) {
 
-		// Interface types come first to override builtin types when
-		// the interface is present.
+	// Interface types come first to override builtin types when
+	// the interface is present.
 
 	case FastKey, SlowKey:
 		return func(a, b interface{}) bool { return b.(SlowKey).Less(a) }
