@@ -10,24 +10,17 @@
 // It automatically and efficiently supports int*, float*, uint*, string, and []byte keys.
 // It supports externally defined key types via the FastKey and SlowKey interfaces.
 //
-// Set, Get*, Insert, and Remove*, operations all require O(log(N))
-// time or less, where N is the number of entries in the list.  The
-// skiplist requires O(N) space.
+// Map, Set, Get*, Insert, and Remove* operations all require
+// O(log(N)) time or less, where N is the number of entries in the
+// list.  Multimap() requires O(log(N)+V) time where V is the number
+// of values returned. The skiplist requires O(N) space.
 //
-// To efficiently iterate over the list (where s is a *Skiplist):
+// To efficiently iterate over the list (where l is a *Skiplist):
 //   for e := l.Front(); e != nil; e = e.Next() {
 //  	// do something with e.Value and/or e.Key()
 //   }
 // Pop the first element in the list with l.RemoveN(0).
 // Pop the last with l.RemoveN(l.Len()-1).
-//
-// To use the skiplist as a Map, mapping each key to a single value, simply avoid the Insert() method.
-//	
-// To use the skiplist as a Multimap, use Insert() instead of Set().
-// To efficiently iterate over all values for a single key:
-//   for e := l.Get(key); e != nil && e.Key() == key; e = e.Next() {
-//     ;
-//   }
 //
 package skiplist
 
