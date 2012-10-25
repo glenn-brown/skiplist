@@ -80,13 +80,10 @@ func (e *Element) String() string { return fmt.Sprintf("%v:%v", e.key, e.Value) 
 
 // New returns a new skiplist in O(1) time.
 // The list will be sorted from least to greatest key.
-// R the random number generator to use, or nil to use the default.
 //
-func New(optional *rand.Rand) *Skiplist {
-	if optional == nil {
-		optional = rand.New(rand.NewSource(42))
-	}
-	nu := &Skiplist{0, nil, []link{}, []prev{}, optional, nil}
+func New() *Skiplist {
+	// Seed a private random number generator for reproducibility.
+	nu := &Skiplist{0, nil, []link{}, []prev{}, rand.New(rand.NewSource(42)), nil}
 
 	// Arrange to set nu.less and nu.score the first time each is called.
 	// We can't do it here because we do not yet know the key type.
@@ -104,11 +101,9 @@ func New(optional *rand.Rand) *Skiplist {
 
 // NewDescending is like New, except keys are sorted from greatest to least.
 //
-func NewDescending(optional *rand.Rand) *Skiplist {
-	if optional == nil {
-		optional = rand.New(rand.NewSource(42))
-	}
-	nu := &Skiplist{0, nil, []link{}, []prev{}, optional, nil}
+func NewDescending() *Skiplist {
+	// Seed a private random number generator for reproducibility.
+	nu := &Skiplist{0, nil, []link{}, []prev{}, rand.New(rand.NewSource(42)), nil}
 
 	// Arrange to set nu.less and nu.score the first time each is called.
 	// We can't do it here because we do not yet know the key type.

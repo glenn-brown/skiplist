@@ -16,7 +16,7 @@ func (*MyType) Less(a, b interface{}) bool {
 //
 func ExampleSlowKey() {
 	keys := []MyType{{1, 2}, {5, 6}, {3, 4}}
-	s := New(nil).Insert(&keys[0], 1).Insert(&keys[1], 2).Insert(&keys[2], 3)
+	s := New().Insert(&keys[0], 1).Insert(&keys[1], 2).Insert(&keys[2], 3)
 	fmt.Print(s)
 	// Output: {&{1 2}:1 &{3 4}:3 &{5 6}:2}
 }

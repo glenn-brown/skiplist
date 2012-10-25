@@ -45,22 +45,16 @@ func TestElement_String(t *testing.T) {
 
 func TestNew(t *testing.T) {
 	t.Parallel()
-	// Verify the injected random number generator is used.
-	s := New(nil)
-	s1 := New(rand.New(rand.NewSource(1)))
-	s42 := New(rand.New(rand.NewSource(42)))
+	// Verify that independent random number generators are used.
+	s, s1 := New(), New()
 	for i := 0; i < 32; i++ {
 		s.Insert(i, i)
 		s1.Insert(i, i)
-		s42.Insert(i, i)
 	}
 	v := s.Visualization()
 	v1 := s1.Visualization()
-	v42 := s42.Visualization()
-	if v == v1 {
-		t.Error("Seed did not change behaviour")
-	} else if v != v42 {
-		// t.Error("Default seed is not 42.")
+	if v != v1 {
+		t.Error("Not reproducible.")
 	}
 }
 
@@ -193,97 +187,97 @@ func TestBuiltins(t *testing.T) {
 
 	// Insert pairs in a map and verify the large is in position 1.
 
-	if New(nil).Set(f32a, 1).Set(f32b, 2).Pos(f32a) != 1 {
+	if New().Set(f32a, 1).Set(f32b, 2).Pos(f32a) != 1 {
 		t.Error("float32")
 	}
-	if New(nil).Set(f64a, 1).Set(f64b, 2).Pos(f64a) != 1 {
+	if New().Set(f64a, 1).Set(f64b, 2).Pos(f64a) != 1 {
 		t.Error("float64")
 	}
-	if New(nil).Set(i16a, 1).Set(i16b, 2).Pos(i16a) != 1 {
+	if New().Set(i16a, 1).Set(i16b, 2).Pos(i16a) != 1 {
 		t.Error("int16")
 	}
-	if New(nil).Set(i32a, 1).Set(i32b, 2).Pos(i32a) != 1 {
+	if New().Set(i32a, 1).Set(i32b, 2).Pos(i32a) != 1 {
 		t.Error("int32")
 	}
-	if New(nil).Set(i64a, 1).Set(i64b, 2).Pos(i64a) != 1 {
+	if New().Set(i64a, 1).Set(i64b, 2).Pos(i64a) != 1 {
 		t.Error("int64")
 	}
-	if New(nil).Set(i8_a, 1).Set(i8_b, 2).Pos(i8_a) != 1 {
+	if New().Set(i8_a, 1).Set(i8_b, 2).Pos(i8_a) != 1 {
 		t.Error("int8")
 	}
-	if New(nil).Set(i__a, 1).Set(i__b, 2).Pos(i__a) != 1 {
+	if New().Set(i__a, 1).Set(i__b, 2).Pos(i__a) != 1 {
 		t.Error("int")
 	}
-	if New(nil).Set(sl_a, 1).Set(sl_b, 2).Pos(sl_a) != 1 {
+	if New().Set(sl_a, 1).Set(sl_b, 2).Pos(sl_a) != 1 {
 		t.Error("[]byte")
 	}
-	if New(nil).Set(stra, 1).Set(strb, 2).Pos(stra) != 1 {
+	if New().Set(stra, 1).Set(strb, 2).Pos(stra) != 1 {
 		t.Error("string")
 	}
-	if New(nil).Set(u16a, 1).Set(u16b, 2).Pos(u16a) != 1 {
+	if New().Set(u16a, 1).Set(u16b, 2).Pos(u16a) != 1 {
 		t.Error("uint16")
 	}
-	if New(nil).Set(u32a, 1).Set(u32b, 2).Pos(u32a) != 1 {
+	if New().Set(u32a, 1).Set(u32b, 2).Pos(u32a) != 1 {
 		t.Error("uint32")
 	}
-	if New(nil).Set(u64a, 1).Set(u64b, 2).Pos(u64a) != 1 {
+	if New().Set(u64a, 1).Set(u64b, 2).Pos(u64a) != 1 {
 		t.Error("uint64")
 	}
-	if New(nil).Set(u8_a, 1).Set(u8_b, 2).Pos(u8_a) != 1 {
+	if New().Set(u8_a, 1).Set(u8_b, 2).Pos(u8_a) != 1 {
 		t.Error("uint8")
 	}
-	if New(nil).Set(u__a, 1).Set(u__b, 2).Pos(u__a) != 1 {
+	if New().Set(u__a, 1).Set(u__b, 2).Pos(u__a) != 1 {
 		t.Error("uint")
 	}
-	if New(nil).Set(up_a, 1).Set(up_b, 2).Pos(up_a) != 1 {
+	if New().Set(up_a, 1).Set(up_b, 2).Pos(up_a) != 1 {
 		t.Error("uintptr")
 	}
 
 	// Insert pairs in a map and verify the large is in position 1.
 
-	if NewDescending(nil).Set(f32a, 1).Set(f32b, 2).Pos(f32b) != 1 {
+	if NewDescending().Set(f32a, 1).Set(f32b, 2).Pos(f32b) != 1 {
 		t.Error("float32")
 	}
-	if NewDescending(nil).Set(f64a, 1).Set(f64b, 2).Pos(f64b) != 1 {
+	if NewDescending().Set(f64a, 1).Set(f64b, 2).Pos(f64b) != 1 {
 		t.Error("float64")
 	}
-	if NewDescending(nil).Set(i16a, 1).Set(i16b, 2).Pos(i16b) != 1 {
+	if NewDescending().Set(i16a, 1).Set(i16b, 2).Pos(i16b) != 1 {
 		t.Error("int16")
 	}
-	if NewDescending(nil).Set(i32a, 1).Set(i32b, 2).Pos(i32b) != 1 {
+	if NewDescending().Set(i32a, 1).Set(i32b, 2).Pos(i32b) != 1 {
 		t.Error("int32")
 	}
-	if NewDescending(nil).Set(i64a, 1).Set(i64b, 2).Pos(i64b) != 1 {
+	if NewDescending().Set(i64a, 1).Set(i64b, 2).Pos(i64b) != 1 {
 		t.Error("int64")
 	}
-	if NewDescending(nil).Set(i8_a, 1).Set(i8_b, 2).Pos(i8_b) != 1 {
+	if NewDescending().Set(i8_a, 1).Set(i8_b, 2).Pos(i8_b) != 1 {
 		t.Error("int8")
 	}
-	if NewDescending(nil).Set(i__a, 1).Set(i__b, 2).Pos(i__b) != 1 {
+	if NewDescending().Set(i__a, 1).Set(i__b, 2).Pos(i__b) != 1 {
 		t.Error("int")
 	}
-	if NewDescending(nil).Set(sl_a, 1).Set(sl_b, 2).Pos(sl_b) != 1 {
+	if NewDescending().Set(sl_a, 1).Set(sl_b, 2).Pos(sl_b) != 1 {
 		t.Error("[]byte")
 	}
-	if NewDescending(nil).Set(stra, 1).Set(strb, 2).Pos(strb) != 1 {
+	if NewDescending().Set(stra, 1).Set(strb, 2).Pos(strb) != 1 {
 		t.Error("string")
 	}
-	if NewDescending(nil).Set(u16a, 1).Set(u16b, 2).Pos(u16b) != 1 {
+	if NewDescending().Set(u16a, 1).Set(u16b, 2).Pos(u16b) != 1 {
 		t.Error("uint16")
 	}
-	if NewDescending(nil).Set(u32a, 1).Set(u32b, 2).Pos(u32b) != 1 {
+	if NewDescending().Set(u32a, 1).Set(u32b, 2).Pos(u32b) != 1 {
 		t.Error("uint32")
 	}
-	if NewDescending(nil).Set(u64a, 1).Set(u64b, 2).Pos(u64b) != 1 {
+	if NewDescending().Set(u64a, 1).Set(u64b, 2).Pos(u64b) != 1 {
 		t.Error("uint64")
 	}
-	if NewDescending(nil).Set(u8_a, 1).Set(u8_b, 2).Pos(u8_b) != 1 {
+	if NewDescending().Set(u8_a, 1).Set(u8_b, 2).Pos(u8_b) != 1 {
 		t.Error("uint8")
 	}
-	if NewDescending(nil).Set(u__a, 1).Set(u__b, 2).Pos(u__b) != 1 {
+	if NewDescending().Set(u__a, 1).Set(u__b, 2).Pos(u__b) != 1 {
 		t.Error("uint")
 	}
-	if NewDescending(nil).Set(up_a, 1).Set(up_b, 2).Pos(up_b) != 1 {
+	if NewDescending().Set(up_a, 1).Set(up_b, 2).Pos(up_b) != 1 {
 		t.Error("uintptr")
 	}
 }
@@ -294,7 +288,7 @@ func TestBuiltins(t *testing.T) {
 
 func Example() {
 	// Create a skiplist and add some entries:
-	s := New(nil).Set("one", "un").Set("two", nil).Set("three", "trois")
+	s := New().Set("one", "un").Set("two", nil).Set("three", "trois")
 
 	// Retrieve a mapping:
 	fmt.Println(1, s.Get("two"))
@@ -339,7 +333,7 @@ func Example() {
 
 // This example demonstrates iteration over all list elements.
 func ExampleElement_Next() {
-	s := New(nil).Insert(0, 0).Insert(1,1).Insert(1, 2).Insert(2, 4)
+	s := New().Insert(0, 0).Insert(1,1).Insert(1, 2).Insert(2, 4)
 
 	// Efficiently iterate over all entries:
 	fmt.Print("A")
@@ -360,12 +354,12 @@ func ExampleElement_Next() {
 }
 
 func ExampleElement_String() {
-	fmt.Println(New(nil).Set("key1", "value1").ElementN(0))
+	fmt.Println(New().Set("key1", "value1").ElementN(0))
 	// Output: key1:value1
 }
 
 func ExampleSkiplist_GetAll() {
-	s := New(nil).Insert(0, 0).Insert(1,1).Insert(1, 2).Insert(2, 4)
+	s := New().Insert(0, 0).Insert(1,1).Insert(1, 2).Insert(2, 4)
 	
 	// Conveniently iterate over values for a single key:
 	for _, ee := range s.GetAll(1) {
@@ -376,13 +370,13 @@ func ExampleSkiplist_GetAll() {
 
 
 func ExampleSkiplist_String() {
-	skip := New(nil).Insert(1, 10).Insert(2, 20).Insert(3, 30)
+	skip := New().Insert(1, 10).Insert(2, 20).Insert(3, 30)
 	fmt.Println(skip)
 	// Output: {1:10 2:20 3:30}
 }
 
 func TestVisualization(t *testing.T) {
-	s := New(nil)
+	s := New()
 	for i := 0; i < 23; i++ {
 		s.Insert(i, i)
 	}
@@ -406,7 +400,7 @@ func TestVisualization(t *testing.T) {
 
 func BenchmarkSkiplist_Insert_forward(b *testing.B) {
 	b.StopTimer()
-	s := New(nil)
+	s := New()
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
 		s.Insert(i, i)
@@ -415,7 +409,7 @@ func BenchmarkSkiplist_Insert_forward(b *testing.B) {
 
 func BenchmarkSkiplist_Insert_reverse(b *testing.B) {
 	b.StopTimer()
-	s := New(nil)
+	s := New()
 	b.StartTimer()
 	for i := b.N - 1; i >= 0; i-- {
 		s.Insert(i, i)
@@ -425,7 +419,7 @@ func BenchmarkSkiplist_Insert_reverse(b *testing.B) {
 func BenchmarkSkiplist_Insert_shuffle(b *testing.B) {
 	b.StopTimer()
 	a := shuffleRange(0, b.N-1)
-	s := New(nil)
+	s := New()
 	b.StartTimer()
 	for i, key := range a {
 		s.Insert(key, i)
@@ -434,7 +428,7 @@ func BenchmarkSkiplist_Insert_shuffle(b *testing.B) {
 
 func BenchmarkSkiplist_Element_forward(b *testing.B) {
 	b.StopTimer()
-	s := New(nil)
+	s := New()
 	for i := b.N - 1; i >= 0; i-- {
 		s.Insert(i, i)
 	}
@@ -446,7 +440,7 @@ func BenchmarkSkiplist_Element_forward(b *testing.B) {
 
 func BenchmarkSkiplist_Element_reverse(b *testing.B) {
 	b.StopTimer()
-	s := New(nil)
+	s := New()
 	for i := 0; i < b.N; i++ {
 		s.Insert(i, i)
 	}
@@ -468,7 +462,7 @@ func BenchmarkSkiplist_Element_shuffle(b *testing.B) {
 
 func BenchmarkSkiplist_ElementN_forward(b *testing.B) {
 	b.StopTimer()
-	s := New(nil)
+	s := New()
 	for i := b.N - 1; i >= 0; i-- {
 		s.Insert(i, i)
 	}
@@ -480,7 +474,7 @@ func BenchmarkSkiplist_ElementN_forward(b *testing.B) {
 
 func BenchmarkSkiplist_ElementN_reverse(b *testing.B) {
 	b.StopTimer()
-	s := New(nil)
+	s := New()
 	for i := 0; i < b.N; i++ {
 		s.Insert(i, i)
 	}
@@ -502,7 +496,7 @@ func BenchmarkSkiplist_ElementN_shuffle(b *testing.B) {
 
 func BenchmarkSkiplist_Remove_forward(b *testing.B) {
 	b.StopTimer()
-	s := New(nil)
+	s := New()
 	for i := b.N - 1; i >= 0; i-- {
 		s.Insert(i, i)
 	}
@@ -514,7 +508,7 @@ func BenchmarkSkiplist_Remove_forward(b *testing.B) {
 
 func BenchmarkSkiplist_Remove_reverse(b *testing.B) {
 	b.StopTimer()
-	s := New(nil)
+	s := New()
 	for i := 0; i < b.N; i++ {
 		s.Insert(i, i)
 	}
@@ -536,7 +530,7 @@ func BenchmarkSkiplist_Remove_shuffle(b *testing.B) {
 
 func BenchmarkSkiplist_RemoveN_head(b *testing.B) {
 	b.StopTimer()
-	s := New(nil)
+	s := New()
 	for i := b.N - 1; i >= 0; i-- {
 		s.Insert(i, i)
 	}
@@ -548,7 +542,7 @@ func BenchmarkSkiplist_RemoveN_head(b *testing.B) {
 
 func BenchmarkSkiplist_RemoveN_tail(b *testing.B) {
 	b.StopTimer()
-	s := New(nil)
+	s := New()
 	for i := 0; i < b.N; i++ {
 		s.Insert(i, i)
 	}
@@ -588,7 +582,7 @@ func shuffleRange(min, max int) []int {
 // Create a Skiplist with each key in [min,max].
 //
 func skiplist(min, max int) *Skiplist {
-	s := New(nil)
+	s := New()
 	for _, v := range shuffleRange(min, max) {
 		s.Insert(v, 2*v)
 	}
