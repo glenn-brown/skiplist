@@ -451,7 +451,7 @@ func (l *Skiplist) String() string {
 // as keys.  An a.Less(b) call should return true iff a < b.
 //
 type SlowKey interface {
-	Less(interface{}) bool
+	Less(a, b interface{}) bool
 }
 
 // The FastKey interface allows externally-defined types to be used
@@ -459,7 +459,7 @@ type SlowKey interface {
 // key.Score() must increase monotonically as key increases.
 //
 type FastKey interface {
-	Less(interface{}) bool
+	Less(a, b interface{}) bool
 	Score() float64
 }
 
@@ -472,7 +472,7 @@ func lessFn(key interface{}) func(a, b interface{}) bool {
 	// the interface is present.
 
 	case FastKey, SlowKey:
-		return func(a, b interface{}) bool { return a.(SlowKey).Less(b) }
+		return func(a, b interface{}) bool { return a.(SlowKey).Less(a, b) }
 
 		// Support builtin types.
 
@@ -510,7 +510,7 @@ func lessFn(key interface{}) func(a, b interface{}) bool {
 	case []byte:
 		return func(a, b interface{}) bool { return bytes.Compare(a.([]byte), b.([]byte)) < 0 }
 	}
-	panic("skiplist: type T not supported.  Consider adding a Less() method.")
+	panic(fmt.Sprintf("skiplist: %T not supported.  Consider adding the SlowKey interface.", key))
 }
 
 // Function lessFn returns the comparison function corresponding to the key type.
@@ -522,7 +522,7 @@ func greaterFn(key interface{}, descending bool) func(a, b interface{}) bool {
 	// the interface is present.
 
 	case FastKey, SlowKey:
-		return func(a, b interface{}) bool { return b.(SlowKey).Less(a) }
+		return func(a, b interface{}) bool { return b.(SlowKey).Less(b, a) }
 
 		// Support builtin types.
 
@@ -560,5 +560,5 @@ func greaterFn(key interface{}, descending bool) func(a, b interface{}) bool {
 	case []byte:
 		return func(a, b interface{}) bool { return bytes.Compare(b.([]byte), a.([]byte)) < 0 }
 	}
-	panic("skiplist: type T not supported.  Consider adding a Less(interface{})bool method.")
+	panic(fmt.Sprintf("skiplist: %T not supported.  Consider adding the SlowKey interface.", key))
 }
