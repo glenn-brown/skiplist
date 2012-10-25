@@ -1,6 +1,6 @@
 // Copyright 2012 The Skiplist Authors
 
-// Package skiplist implements a fast indexable ordered map/multimap
+// Package skiplist implements a fast indexable ordered map/multimap.
 //
 // This skip list has some features that make it special:
 // It supports position-index addressing.
