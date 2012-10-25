@@ -51,8 +51,8 @@ func TestNew(t *testing.T) {
 		s.Insert(i, i)
 		s1.Insert(i, i)
 	}
-	v := s.Visualization()
-	v1 := s1.Visualization()
+	v := s.visualization()
+	v1 := s1.visualization()
 	if v != v1 {
 		t.Error("Not reproducible.")
 	}
@@ -105,7 +105,7 @@ func TestSkiplist_RemoveN(t *testing.T) {
 		found, pos := s.ElementPos(key)
 		t.Logf("Removing key=%v at pos=%v", key, pos)
 		t.Log(key, found, pos)
-		t.Log("\n" + s.Visualization())
+		t.Log("\n" + s.visualization())
 		e := s.RemoveN(pos)
 		if e == nil {
 			t.Error("nil returned")
@@ -380,7 +380,7 @@ func TestVisualization(t *testing.T) {
 	for i := 0; i < 23; i++ {
 		s.Insert(i, i)
 	}
-	v := s.Visualization()
+	v := s.visualization()
 	expected := "" +
 		"L4 |------------------------------------------------------------------->|->/\n" +
 		"L3 |------------------------------------------------------------------->|->/\n" +
@@ -612,7 +612,7 @@ func arrow(cnt int) (s string) {
 //         0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  1  1  1  1  1  1  1  
 //         0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f  0  1  2  3  4  5  6
 //
-func (l *Skiplist) Visualization() (s string) {
+func (l *Skiplist) visualization() (s string) {
 	for level := len(l.links) - 1; level >= 0; level-- {
 		s += fmt.Sprintf("L%d ", level)
 		w := l.links[level].width
