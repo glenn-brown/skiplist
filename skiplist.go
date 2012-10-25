@@ -181,12 +181,26 @@ func (l *Skiplist) Insert(key interface{}, value interface{}) *Skiplist {
 // If there is no corresponding value, nil is returned.
 // If there are multiple corresponding values, the youngest is returned.
 //
+// If the list might contain an nil value, you may want to use GetOk instead.
+//
 func (l *Skiplist) Get(key interface{}) (value interface{}) {
 	e, _ := l.ElementPos(key)
 	if nil == e {
 		return nil
 	}
 	return e.Value
+}
+
+// GetOk returns the value corresponding to key in the table in O(log(N)) time.
+// The return value ok is true iff the key was present.
+// If there is no corresponding value, nil and false are returned.
+// If there are multiple corresponding values, the youngest is returned.
+func (l *Skiplist) GetOk(key interface{}) (value interface{}, ok bool) {
+	e, _ := l.ElementPos(key)
+	if nil == e {
+		return nil, false
+	}
+	return e.Value, true
 }
 
 // GetAll returns all values coresponding to key in the list, starting with the youngest.
