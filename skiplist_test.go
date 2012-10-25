@@ -130,7 +130,7 @@ func TestSkiplist_RemoveN(t *testing.T) {
 	}
 }
 
-func TestSkiplist_ElementForward(t *testing.T) {
+func TestSkiplist_Element_forward(t *testing.T) {
 	t.Parallel()
 	s := skiplist(0, 9)
 	for i := s.Len() - 1; i >= 0; i-- {
@@ -326,7 +326,7 @@ func ExampleVisualization() {
 // Benchmarks
 ////////////////////////////////////////////////////////////////
 
-func BenchmarkSkiplist_InsertForward(b *testing.B) {
+func BenchmarkSkiplist_Insert_forward(b *testing.B) {
 	b.StopTimer()
 	s := New(nil)
 	b.StartTimer()
@@ -335,7 +335,7 @@ func BenchmarkSkiplist_InsertForward(b *testing.B) {
 	}
 }
 
-func BenchmarkSkiplist_InsertReverse(b *testing.B) {
+func BenchmarkSkiplist_Insert_reverse(b *testing.B) {
 	b.StopTimer()
 	s := New(nil)
 	b.StartTimer()
@@ -344,7 +344,7 @@ func BenchmarkSkiplist_InsertReverse(b *testing.B) {
 	}
 }
 
-func BenchmarkSkiplist_InsertShuffle(b *testing.B) {
+func BenchmarkSkiplist_Insert_shuffle(b *testing.B) {
 	b.StopTimer()
 	a := shuffleRange(0, b.N-1)
 	s := New(nil)
@@ -354,7 +354,7 @@ func BenchmarkSkiplist_InsertShuffle(b *testing.B) {
 	}
 }
 
-func BenchmarkSkiplist_ElementForward(b *testing.B) {
+func BenchmarkSkiplist_Element_forward(b *testing.B) {
 	b.StopTimer()
 	s := New(nil)
 	for i := b.N - 1; i >= 0; i-- {
@@ -366,7 +366,7 @@ func BenchmarkSkiplist_ElementForward(b *testing.B) {
 	}
 }
 
-func BenchmarkSkiplist_ElementReverse(b *testing.B) {
+func BenchmarkSkiplist_Element_reverse(b *testing.B) {
 	b.StopTimer()
 	s := New(nil)
 	for i := 0; i < b.N; i++ {
@@ -378,7 +378,7 @@ func BenchmarkSkiplist_ElementReverse(b *testing.B) {
 	}
 }
 
-func BenchmarkSkiplist_ElementShuffle(b *testing.B) {
+func BenchmarkSkiplist_Element_shuffle(b *testing.B) {
 	b.StopTimer()
 	a := shuffleRange(0, b.N-1)
 	s := skiplist(0, b.N-1)
@@ -388,7 +388,7 @@ func BenchmarkSkiplist_ElementShuffle(b *testing.B) {
 	}
 }
 
-func BenchmarkSkiplist_ElementNForward(b *testing.B) {
+func BenchmarkSkiplist_ElementN_forward(b *testing.B) {
 	b.StopTimer()
 	s := New(nil)
 	for i := b.N - 1; i >= 0; i-- {
@@ -400,7 +400,7 @@ func BenchmarkSkiplist_ElementNForward(b *testing.B) {
 	}
 }
 
-func BenchmarkSkiplist_ElementNReverse(b *testing.B) {
+func BenchmarkSkiplist_ElementN_reverse(b *testing.B) {
 	b.StopTimer()
 	s := New(nil)
 	for i := 0; i < b.N; i++ {
@@ -412,7 +412,7 @@ func BenchmarkSkiplist_ElementNReverse(b *testing.B) {
 	}
 }
 
-func BenchmarkSkiplist_ElementNShuffle(b *testing.B) {
+func BenchmarkSkiplist_ElementN_shuffle(b *testing.B) {
 	b.StopTimer()
 	a := shuffleRange(0, b.N-1)
 	s := skiplist(0, b.N-1)
@@ -422,7 +422,7 @@ func BenchmarkSkiplist_ElementNShuffle(b *testing.B) {
 	}
 }
 
-func BenchmarkSkiplist_RemoveForward(b *testing.B) {
+func BenchmarkSkiplist_Remove_forward(b *testing.B) {
 	b.StopTimer()
 	s := New(nil)
 	for i := b.N - 1; i >= 0; i-- {
@@ -434,7 +434,7 @@ func BenchmarkSkiplist_RemoveForward(b *testing.B) {
 	}
 }
 
-func BenchmarkSkiplist_RemoveReverse(b *testing.B) {
+func BenchmarkSkiplist_Remove_reverse(b *testing.B) {
 	b.StopTimer()
 	s := New(nil)
 	for i := 0; i < b.N; i++ {
@@ -446,7 +446,7 @@ func BenchmarkSkiplist_RemoveReverse(b *testing.B) {
 	}
 }
 
-func BenchmarkSkiplist_RemoveShuffle(b *testing.B) {
+func BenchmarkSkiplist_Remove_shuffle(b *testing.B) {
 	b.StopTimer()
 	a := shuffleRange(0, b.N-1)
 	s := skiplist(0, b.N-1)
@@ -456,7 +456,7 @@ func BenchmarkSkiplist_RemoveShuffle(b *testing.B) {
 	}
 }
 
-func BenchmarkSkiplist_RemoveNHead(b *testing.B) {
+func BenchmarkSkiplist_RemoveN_head(b *testing.B) {
 	b.StopTimer()
 	s := New(nil)
 	for i := b.N - 1; i >= 0; i-- {
@@ -468,7 +468,7 @@ func BenchmarkSkiplist_RemoveNHead(b *testing.B) {
 	}
 }
 
-func BenchmarkSkiplist_RemoveNTail(b *testing.B) {
+func BenchmarkSkiplist_RemoveN_tail(b *testing.B) {
 	b.StopTimer()
 	s := New(nil)
 	for i := 0; i < b.N; i++ {
@@ -480,7 +480,7 @@ func BenchmarkSkiplist_RemoveNTail(b *testing.B) {
 	}
 }
 
-func BenchmarkSkiplist_RemoveNMid(b *testing.B) {
+func BenchmarkSkiplist_RemoveN_mid(b *testing.B) {
 	b.StopTimer()
 	s := skiplist(0, b.N-1)
 	b.StartTimer()
