@@ -170,6 +170,76 @@ func TestSkiplist_ElementN(t *testing.T) {
 	}
 }
 
+func TestBuiltins(t *testing.T) {
+	t.Parallel()
+
+	// Create high and low variables for each ordered builtin type.
+
+	f32a, f32b := float32(1.0), float32(0.0)
+	f64a, f64b := float64(1.0), float64(0.0)
+	i16a, i16b := int16(1), int16(0)
+	i32a, i32b := int32(1), int32(0)
+	i64a, i64b := int64(1), int64(0)
+	i8_a, i8_b := int8(1), int8(0)
+	i__a, i__b := int(1), int(0)
+	sl_a, sl_b := []byte{1}, []byte{0}
+	stra, strb := "1", "0"
+	u16a, u16b := uint16(1), uint16(0)
+	u32a, u32b := uint32(1), uint32(0)
+	u64a, u64b := uint64(1), uint64(0)
+	u8_a, u8_b := uint8(1), uint8(0)
+	u__a, u__b := uint(1), uint(0)
+	up_a, up_b := uintptr(1), uintptr(0)
+
+	// Insert pairs in a map and verify the large is in position 1.
+
+	if New(nil).Set(f32a, 1).Set(f32b, 2).Pos(f32a) != 1 {
+		t.Error("float32")
+	}
+	if New(nil).Set(f64a, 1).Set(f64b, 2).Pos(f64a) != 1 {
+		t.Error("float64")
+	}
+	if New(nil).Set(i16a, 1).Set(i16b, 2).Pos(i16a) != 1 {
+		t.Error("int16")
+	}
+	if New(nil).Set(i32a, 1).Set(i32b, 2).Pos(i32a) != 1 {
+		t.Error("int32")
+	}
+	if New(nil).Set(i64a, 1).Set(i64b, 2).Pos(i64a) != 1 {
+		t.Error("int64")
+	}
+	if New(nil).Set(i8_a, 1).Set(i8_b, 2).Pos(i8_a) != 1 {
+		t.Error("int8")
+	}
+	if New(nil).Set(i__a, 1).Set(i__b, 2).Pos(i__a) != 1 {
+		t.Error("int")
+	}
+	if New(nil).Set(sl_a, 1).Set(sl_b, 2).Pos(sl_a) != 1 {
+		t.Error("[]byte")
+	}
+	if New(nil).Set(stra, 1).Set(strb, 2).Pos(stra) != 1 {
+		t.Error("string")
+	}
+	if New(nil).Set(u16a, 1).Set(u16b, 2).Pos(u16a) != 1 {
+		t.Error("uint16")
+	}
+	if New(nil).Set(u32a, 1).Set(u32b, 2).Pos(u32a) != 1 {
+		t.Error("uint32")
+	}
+	if New(nil).Set(u64a, 1).Set(u64b, 2).Pos(u64a) != 1 {
+		t.Error("uint64")
+	}
+	if New(nil).Set(u8_a, 1).Set(u8_b, 2).Pos(u8_a) != 1 {
+		t.Error("uint8")
+	}
+	if New(nil).Set(u__a, 1).Set(u__b, 2).Pos(u__a) != 1 {
+		t.Error("uint")
+	}
+	if New(nil).Set(up_a, 1).Set(up_b, 2).Pos(up_a) != 1 {
+		t.Error("uintptr")
+	}
+}
+
 ////////////////////////////////////////////////////////////////
 // Examples
 ////////////////////////////////////////////////////////////////
