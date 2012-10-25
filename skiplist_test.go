@@ -297,26 +297,27 @@ func Example() {
 	s := New(nil).Set("one", "un").Set("two", nil).Set("three", "trois")
 
 	// Retrieve a mapping:
-	fmt.Println(s.Get("two"))
+	fmt.Println(1, s.Get("two"))
 
 	// Replace a mapping:
 	s.Set("two", "deux")
 
 	// Print the skiplist:
-	fmt.Println(s)
+	fmt.Println(2, s)
 
 	// Add more than one value for a key, even of different value-type:
 	s.Insert("three", 3)
 
 	// Retrieve all values for the key:
-	fmt.Println(s.GetAll("three"))
+	fmt.Println(3, s.GetAll("three"))
 
 	// Or just the youngest:
-	fmt.Println(s.Get("three"))
+	fmt.Println(4, s.Get("three"))
 
 	// Iterate over all values in the map:
+	fmt.Print(5)
 	for e := s.Front(); nil != e; e = e.Next() {
-		fmt.Print(e.Key(), "->", e.Value, ",")
+		fmt.Print(" ", e.Key(), "->", e.Value)
 	}
 	fmt.Println()
 
@@ -325,15 +326,15 @@ func Example() {
 
 	// Pop the last entry:
 	s.RemoveN(s.Len() - 1)
-	fmt.Println(s)
+	fmt.Println(6, s)
 
 	// Output:
-	// <nil>
-	// {one:un three:trois two:deux}
-	// [3 trois]
-	// 3
-	// one->un,three->3,three->trois,two->deux,
-	// {three:3 three:trois}
+	// 1 <nil>
+	// 2 {one:un three:trois two:deux}
+	// 3 [3 trois]
+	// 4 3
+	// 5 one->un three->3 three->trois two->deux
+	// 6 {three:3 three:trois}
 }
 
 // This example demonstrates iteration over all list elements.
