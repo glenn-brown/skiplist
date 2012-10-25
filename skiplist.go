@@ -15,13 +15,6 @@
 // list.  GetAll() requires O(log(N)+V) time where V is the number
 // of values returned. The skiplist requires O(N) space.
 //
-// To efficiently iterate over the list (where l is a *Skiplist):
-//   for e := l.Front(); e != nil; e = e.Next() {
-//  	// do something with e.Value and/or e.Key()
-//   }
-// Pop the first element in the list with l.RemoveN(0).
-// Pop the last with l.RemoveN(l.Len()-1).
-//
 package skiplist
 
 import (
@@ -149,7 +142,7 @@ func (l *Skiplist) insert(key interface{}, value interface{}, replace bool) *Ski
 	next := prev[0].link.to
 	if replace && nil != next && s == next.score &&
 		!l.less(key, next.key) && !l.less(next.key, key) {
-		
+
 		l.remove(prev, next)
 	}
 	nuLevels := l.randLevels(len(l.links))

@@ -292,6 +292,51 @@ func TestBuiltins(t *testing.T) {
 // Examples
 ////////////////////////////////////////////////////////////////
 
+func Example() {
+	// Create a skiplist and add some entries:
+	s := New(nil).Set("one", "un").Set("two", nil).Set("three", "trois")
+
+	// Retrieve a mapping:
+	fmt.Println(s.Get("two"))
+
+	// Replace a mapping:
+	s.Set("two", "deux")
+
+	// Print the skiplist:
+	fmt.Println(s)
+
+	// Add more than one value for a key, even of different value-type:
+	s.Insert("three", 3)
+
+	// Retrieve all values for the key:
+	fmt.Println(s.GetAll("three"))
+
+	// Or just the youngest:
+	fmt.Println(s.Get("three"))
+
+	// Iterate over all values in the map:
+	for e := s.Front(); nil != e; e = e.Next() {
+		fmt.Print(e.Key(), "->", e.Value, ",")
+	}
+	fmt.Println()
+
+	// Pop the first entry:
+	s.RemoveN(0)
+
+	// Pop the last entry:
+	s.RemoveN(s.Len() - 1)
+	fmt.Println(s)
+
+	// Output:
+	// <nil>
+	// {one:un three:trois two:deux}
+	// [3 trois]
+	// 3
+	// one->un,three->3,three->trois,two->deux,
+	// {three:3 three:trois}
+}
+
+// This example demonstrates iteration over all list elements.
 func ExampleElement_Next() {
 	s := New(nil).Insert(0, 0).Insert(1, 2).Insert(2, 4).Insert(3, 6)
 	for e := s.Front(); e != nil; e = e.Next() {
