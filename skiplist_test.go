@@ -238,6 +238,54 @@ func TestBuiltins(t *testing.T) {
 	if New(nil).Set(up_a, 1).Set(up_b, 2).Pos(up_a) != 1 {
 		t.Error("uintptr")
 	}
+
+	// Insert pairs in a map and verify the large is in position 1.
+
+	if NewDescending(nil).Set(f32a, 1).Set(f32b, 2).Pos(f32b) != 1 {
+		t.Error("float32")
+	}
+	if NewDescending(nil).Set(f64a, 1).Set(f64b, 2).Pos(f64b) != 1 {
+		t.Error("float64")
+	}
+	if NewDescending(nil).Set(i16a, 1).Set(i16b, 2).Pos(i16b) != 1 {
+		t.Error("int16")
+	}
+	if NewDescending(nil).Set(i32a, 1).Set(i32b, 2).Pos(i32b) != 1 {
+		t.Error("int32")
+	}
+	if NewDescending(nil).Set(i64a, 1).Set(i64b, 2).Pos(i64b) != 1 {
+		t.Error("int64")
+	}
+	if NewDescending(nil).Set(i8_a, 1).Set(i8_b, 2).Pos(i8_b) != 1 {
+		t.Error("int8")
+	}
+	if NewDescending(nil).Set(i__a, 1).Set(i__b, 2).Pos(i__b) != 1 {
+		t.Error("int")
+	}
+	if NewDescending(nil).Set(sl_a, 1).Set(sl_b, 2).Pos(sl_b) != 1 {
+		t.Error("[]byte")
+	}
+	if NewDescending(nil).Set(stra, 1).Set(strb, 2).Pos(strb) != 1 {
+		t.Error("string")
+	}
+	if NewDescending(nil).Set(u16a, 1).Set(u16b, 2).Pos(u16b) != 1 {
+		t.Error("uint16")
+	}
+	if NewDescending(nil).Set(u32a, 1).Set(u32b, 2).Pos(u32b) != 1 {
+		t.Error("uint32")
+	}
+	if NewDescending(nil).Set(u64a, 1).Set(u64b, 2).Pos(u64b) != 1 {
+		t.Error("uint64")
+	}
+	if NewDescending(nil).Set(u8_a, 1).Set(u8_b, 2).Pos(u8_b) != 1 {
+		t.Error("uint8")
+	}
+	if NewDescending(nil).Set(u__a, 1).Set(u__b, 2).Pos(u__b) != 1 {
+		t.Error("uint")
+	}
+	if NewDescending(nil).Set(up_a, 1).Set(up_b, 2).Pos(up_b) != 1 {
+		t.Error("uintptr")
+	}
 }
 
 ////////////////////////////////////////////////////////////////
