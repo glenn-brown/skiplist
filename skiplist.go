@@ -10,9 +10,9 @@
 // It automatically and efficiently supports int*, float*, uint*, string, and []byte keys.
 // It supports externally defined key types via the FastKey and SlowKey interfaces.
 //
-// Map, Set, Element*, Insert, and Remove* operations all require
+// Get, Set, Insert, Remove*, Element*, and Pos operations all require
 // O(log(N)) time or less, where N is the number of entries in the
-// list.  Multimap() requires O(log(N)+V) time where V is the number
+// list.  GetAll() requires O(log(N)+V) time where V is the number
 // of values returned. The skiplist requires O(N) space.
 //
 // To efficiently iterate over the list (where l is a *Skiplist):
@@ -184,11 +184,11 @@ func (l *Skiplist) Insert(key interface{}, value interface{}) *Skiplist {
 	return l.insert(key, value, false)
 }
 
-// Map returns the value corresponding to key in the table in O(log(N)) time.
+// Get returns the value corresponding to key in the table in O(log(N)) time.
 // If there is no corresponding value, nil is returned.
 // If there are multiple corresponding values, the youngest is returned.
 //
-func (l *Skiplist) Map(key interface{}) (value interface{}) {
+func (l *Skiplist) Get(key interface{}) (value interface{}) {
 	e, _ := l.ElementPos(key)
 	if nil == e {
 		return nil
@@ -196,11 +196,11 @@ func (l *Skiplist) Map(key interface{}) (value interface{}) {
 	return e.Value
 }
 
-// Multimap returns all values coresponding to key in the list, starting with the youngest.
+// GetAll returns all values coresponding to key in the list, starting with the youngest.
 // If no value corresponds, an empty slice is returned.
 // O(log(N)+V) time is required, where M is the number of values returned.
 //
-func (l *Skiplist) Multimap(key interface{}) (values []interface{}) {
+func (l *Skiplist) GetAll(key interface{}) (values []interface{}) {
 	s := l.score(key)
 	prevs, _ := l.prevs(key, s)
 	e := prevs[0].link.to
@@ -301,7 +301,7 @@ func (l *Skiplist) RemoveN(index int) *Element {
 // Element returns the youngest list element for key and its position,
 // If there is no match, nil and -1 are returned.
 //
-// Consider using Map or Multimap instead if you only want Values.
+// Consider using Get or GetAll instead if you only want Values.
 //
 func (l *Skiplist) ElementPos(key interface{}) (e *Element, pos int) {
 	s := l.score(key)
@@ -325,7 +325,7 @@ func (l *Skiplist) Element(key interface{}) (e *Element) {
 // without modifying the list, in O(log(N)) time.
 // If there is no match, -1 is returned.
 //
-// Consider using Map or Multimap instead if you only want Values.
+// Consider using Get or GetAll instead if you only want Values.
 //
 func (l *Skiplist) Pos(key interface{}) (pos int) {
 	_, pos = l.ElementPos(key)
