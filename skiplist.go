@@ -82,11 +82,11 @@ func (e *Element) String() string { return fmt.Sprintf("%v:%v", e.key, e.Value) 
 // The list will be sorted from least to greatest key.
 // R the random number generator to use, or nil to use the default.
 //
-func New(r *rand.Rand) *Skiplist {
-	if r == nil {
-		r = rand.New(rand.NewSource(42))
+func New(optional *rand.Rand) *Skiplist {
+	if optional == nil {
+		optional = rand.New(rand.NewSource(42))
 	}
-	nu := &Skiplist{0, nil, []link{}, []prev{}, r, nil}
+	nu := &Skiplist{0, nil, []link{}, []prev{}, optional, nil}
 
 	// Arrange to set nu.less and nu.score the first time each is called.
 	// We can't do it here because we do not yet know the key type.
@@ -104,11 +104,11 @@ func New(r *rand.Rand) *Skiplist {
 
 // NewDescending is like New, except keys are sorted from greatest to least.
 //
-func NewDescending(r *rand.Rand) *Skiplist {
-	if r == nil {
-		r = rand.New(rand.NewSource(42))
+func NewDescending(optional *rand.Rand) *Skiplist {
+	if optional == nil {
+		optional = rand.New(rand.NewSource(42))
 	}
-	nu := &Skiplist{0, nil, []link{}, []prev{}, r, nil}
+	nu := &Skiplist{0, nil, []link{}, []prev{}, optional, nil}
 
 	// Arrange to set nu.less and nu.score the first time each is called.
 	// We can't do it here because we do not yet know the key type.
