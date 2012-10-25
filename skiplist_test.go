@@ -108,7 +108,7 @@ func TestSkiplist_RemoveN(t *testing.T) {
 	keys := shuffleRange(0, 10)
 	cnt := 11
 	for _, key := range keys {
-		found, pos := s.Element(key)
+		found, pos := s.ElementPos(key)
 		t.Logf("Removing key=%v at pos=%v", key, pos)
 		t.Log(key, found, pos)
 		t.Log("\n" + s.Visualization())
@@ -134,7 +134,7 @@ func TestSkiplist_ElementForward(t *testing.T) {
 	t.Parallel()
 	s := skiplist(0, 9)
 	for i := s.Len() - 1; i >= 0; i-- {
-		e, pos := s.Element(i)
+		e, pos := s.ElementPos(i)
 		if e == nil {
 			t.Error("nil")
 		} else if e != s.ElementN(pos) {

@@ -147,7 +147,9 @@ func (l *Skiplist) insert(key interface{}, value interface{}, replace bool) *Ski
 	s := l.score(key)
 	prev, pos := l.prevs(key, s)
 	next := prev[0].link.to
-	if replace && (s != next.score || s == next.score && (l.less(key, next.key) || l.less(next.key, key))) {
+	if replace && nil != next && s == next.score &&
+		!l.less(key, next.key) && !l.less(next.key, key) {
+		
 		l.remove(prev, next)
 	}
 	nuLevels := l.randLevels(len(l.links))
@@ -187,7 +189,7 @@ func (l *Skiplist) Insert(key interface{}, value interface{}) *Skiplist {
 // If there are multiple corresponding values, the youngest is returned.
 //
 func (l *Skiplist) Map(key interface{}) (value interface{}) {
-	e, _ := l.Element(key)
+	e, _ := l.ElementPos(key)
 	if nil == e {
 		return nil
 	}
@@ -296,14 +298,12 @@ func (l *Skiplist) RemoveN(index int) *Element {
 	return l.remove(prevs, elem)
 }
 
-// Element returns the youngest element inserted with key in the
-// skiplist, without modifying the list, in O(log(N)) time.
-// If there is no match, nil is returned.
-// It also returns the current position of the found element, or -1.
+// Element returns the youngest list element for key and its position,
+// If there is no match, nil and -1 are returned.
 //
 // Consider using Map or Multimap instead if you only want Values.
 //
-func (l *Skiplist) Element(key interface{}) (e *Element, pos int) {
+func (l *Skiplist) ElementPos(key interface{}) (e *Element, pos int) {
 	s := l.score(key)
 	prev, pos := l.prevs(key, s)
 	elem := prev[0].link.to
@@ -311,6 +311,25 @@ func (l *Skiplist) Element(key interface{}) (e *Element, pos int) {
 		return nil, -1
 	}
 	return elem, pos
+}
+
+// Element returns the youngest list element for key,
+// without modifying the list, in O(log(N)) time.
+// If there is no match, nil is returned.
+func (l *Skiplist) Element(key interface{}) (e *Element) {
+	e, _ = l.ElementPos(key)
+	return e
+}
+
+// ElementPos returns the position of the youngest list element for key,
+// without modifying the list, in O(log(N)) time.
+// If there is no match, -1 is returned.
+//
+// Consider using Map or Multimap instead if you only want Values.
+//
+func (l *Skiplist) Pos(key interface{}) (pos int) {
+	_, pos = l.ElementPos(key)
+	return pos
 }
 
 // Len returns the number of elements in the Skiplist.
