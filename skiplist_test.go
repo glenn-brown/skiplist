@@ -346,6 +346,11 @@ func ExampleElement_Next() {
 	// Output: 0:0 1:2 2:4 3:6
 }
 
+func ExampleElement_String() {
+	fmt.Println(New(nil).Set("key1", "value1").ElementN(0))
+	// Output: key1:value1
+}
+
 func ExampleSkiplist_String() {
 	skip := New(nil).Insert(1, 10).Insert(2, 20).Insert(3, 30)
 	fmt.Println(skip)
