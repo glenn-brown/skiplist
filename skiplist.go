@@ -82,11 +82,14 @@ func (e *Element) String() string { return fmt.Sprintf("%v:%v", e.key, e.Value) 
 // The list will be sorted from least to greatest key.
 //
 func New() *Skiplist {
+	
 	// Seed a private random number generator for reproducibility.
+		
 	nu := &Skiplist{0, nil, []link{}, []prev{}, rand.New(rand.NewSource(42)), nil}
 
 	// Arrange to set nu.less and nu.score the first time each is called.
-	// We can't do it here because we do not yet know the key type.
+	// We can't do it here because we can't infer the key type until the first
+	// key is inserted.
 
 	nu.less = func(a, b interface{}) bool {
 		nu.less = lessFn(a)
@@ -102,11 +105,14 @@ func New() *Skiplist {
 // NewDescending is like New, except keys are sorted from greatest to least.
 //
 func NewDescending() *Skiplist {
+	
 	// Seed a private random number generator for reproducibility.
+	
 	nu := &Skiplist{0, nil, []link{}, []prev{}, rand.New(rand.NewSource(42)), nil}
 
 	// Arrange to set nu.less and nu.score the first time each is called.
-	// We can't do it here because we do not yet know the key type.
+	// We can't do it here because we can't infer the key type until the first
+	// key is inserted.
 
 	nu.less = func(a, b interface{}) bool {
 		nu.less = greaterFn(a, true)
@@ -206,7 +212,7 @@ func (l *Skiplist) GetAll(key interface{}) (values []interface{}) {
 	s := l.score(key)
 	prevs, _ := l.prevs(key, s)
 	e := prevs[0].link.to
-	for nil != e && e.score == s && !l.less(e.key, key) {
+	for nil != e && e.score == s && !l.less(key, e.key) {
 		values = append(values, e.Value)
 		e = e.links[0].to
 	}
