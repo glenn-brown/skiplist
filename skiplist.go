@@ -29,20 +29,21 @@ import (
 // associated 'width' specifying the number of nodes it skips, so
 // nodes can also be referenced by position.
 //
-// For example, here is a 24-entry skip list:
-//   L4 |---------------------------------------------------------------------->/
-//   L3 |------------------------------------------->|------------------------->/
-//   L2 |---------->|---------->|---------->|------->|---------------->|---->|->/
-//   L1 |---------->|---------->|---------->|->|---->|->|->|->|------->|->|->|->/
-//   L0 |->|->|->|->|->|->|->|->|->|->|->|->|->|->|->|->|->|->|->|->|->|->|->|->/
-//         0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  1  1  1  1  1  1  1  
-//         0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f  0  1  2  3  4  5  6
+// For example, a 64-entry skip list with values from 0x00 to
+// 0x3f might look like this:
+//   L5 --------------------------------------------------------------->/
+//   L4 ---------------------------------->->-------------------------->/
+//   L3 ------------------->>-->-------->->->-------------------------->/
+//   L2 -->------------>->->>-->-------->->->-->--->->---------->------>/
+//   L1 >->->-->-->-->>>->->>>->-------->->->-->->->->-->--->--->------>/
+//   L0 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>/
+//      0000000000000000111111111111111122222222222222223333333333333333
+//      0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
 
 type Skiplist struct {
 	cnt   int
 	less  func(a, b interface{}) bool
 	links []link
-	prev  []prev
 	rng   *rand.Rand
 }
 type link struct {
@@ -54,9 +55,9 @@ type link struct {
 // element.Key() to access the protected key.
 //
 type Element struct {
+	links []link
 	key   interface{} // private to protect order
 	Value interface{}
-	links []link
 }
 
 // Key returns the key used to insert the value in the list element.
@@ -80,7 +81,7 @@ func New(less func(key1, key2 interface{}) bool, r *rand.Rand) *Skiplist {
 	if r == nil {
 		r = rand.New(rand.NewSource(42))
 	}
-	return &Skiplist{0, less, []link{}, []prev{}, r}
+	return &Skiplist{0, less, []link{}, r}
 }
 
 // Return the first list element in O(1) time.
@@ -94,99 +95,114 @@ func (s *Skiplist) Front() *Element {
 
 // Insert a {key,value} pair into the skip list in O(log(N)) time.
 //
-func (s *Skiplist) Insert(key interface{}, value interface{}) *Skiplist {
-	s.grow()
-	prev, pos := s.prevs(key)
-	nuLevels := s.randLevels(len(s.links))
-	nu := &Element{key, value, make([]link, nuLevels)}
-	for level := range prev {
-		if level < nuLevels {
-			if level == 0 {
-				// At the bottom level, simply link in the new Element of width 1
-				to := prev[level].link.to
-				prev[level].link.to = nu
-				nu.links[level].width = 1
-				nu.links[level].to = to
-				continue
-			}
-			// Link in the new element.
-			end := prev[level].pos + prev[level].link.width + 1
-			nu.links[level].to = prev[level].link.to
-			nu.links[level].width = end - pos
-			prev[level].link.to = nu
-			prev[level].link.width = pos - prev[level].pos
-			continue
-		}
-		// Higher levels just get a width adjustment.
-		prev[level].link.width += 1
-	}
-	return s
+func (l *Skiplist) Insert(key interface{}, value interface{}) *Skiplist {
+	l.grow()
+	level := len(l.links) - 1
+	l.insert(&l.links, level, &Element{[]link{}, key, value})
+	return l
 }
 
-// Remove the youngest Element associate with Key, if any, in O(log(N)) time.
+func (l *Skiplist) insert(links *[]link, level int, nu *Element) (lwidth int, stopped bool) {
+	// Walk to the correct insertion location.
+	for (*links)[level].to != nil && l.less((*links)[level].to.key, nu.key) {
+		lwidth += (*links)[level].width
+		links = &(*links)[level].to.links
+	}
+	// At the bottom level, simply link in the Element.
+	if level == 0 {
+		nu.links = append(nu.links, link{(*links)[0].to, 1})
+		(*links)[0].to = nu
+		return lwidth, false
+	}
+	// Link in the new Element at the lower levels.
+	rwidth, stopped := l.insert(links, level-1, nu)
+	// Don't link in the Element if lower levels have stopped linking,
+	// or if we randomly chose to stop linking.
+	if stopped || l.rng.Intn(2) < 1 {
+		(*links)[level].width += 1
+		return 0, true
+	}
+	// Link in the Element on this level.
+	nu.links = append(nu.links, link{(*links)[level].to, (*links)[level].width - rwidth})
+	(*links)[level].to = nu
+	(*links)[level].width = rwidth + 1
+	return lwidth + rwidth, false
+}
+
+// Remove the youngest Element associate with Key, if any, in O(1) time.
 // Return the removed element or nil.
 //
 func (l *Skiplist) Remove(key interface{}) *Element {
-	levels := len(l.links)
-	// Create scratch space to store predecessor information.
-	prev := l.prev
-	// Compute elements preceding the insertion location at each level.
-	links := l.links
-	for level := levels - 1; level >= 0; level-- {
-		ll := &links[level]
-		// Find predecessor link at this level.
-		for ll.to != nil && l.less(ll.to.key, key) {
-			links = ll.to.links
-			ll = &links[level]
+	removed := l.remove(&l.links, len(l.links)-1, key)
+	if removed != nil {
+		l.shrink()
+	}
+	return removed
+}
+func (s *Skiplist) remove(links *[]link, level int, key interface{}) *Element {
+	// Walk to the correct deletion location.
+	for (*links)[level].to != nil && s.less((*links)[level].to.key, key) {
+		links = &(*links)[level].to.links
+	}
+	// For level 0, simply remove the found Element.
+	if level == 0 {
+		n := (*links)[0].to
+		if n == nil || s.less(key, n.key) {
+			return nil
 		}
-		// Record the predecessor at this level and its position.
-		prev[level].link = ll
+		(*links)[0].to = n.links[0].to
+		// width is already 1 for level 0.
+		return n
 	}
-	// Verify there is a matching entry to remove.
-	elem := prev[0].link.to
-	if elem == nil || l.less(key, elem.key) {
-		return nil
+	// For other levels, recur.
+	removed := s.remove(links, level-1, key)
+	if removed != nil {
+		if removed == (*links)[level].to {
+			(*links)[level].to = removed.links[level].to
+			(*links)[level].width += removed.links[level].width - 1
+		} else {
+			(*links)[level].width -= 1
+		}
 	}
-	// At the bottom level, simply unlink the element.
-	prev[0].link.to = elem.links[0].to
-	// Unlink any higher linked levels.
-	level := 1
-	for ; level < levels && prev[level].link.to == elem; level++ {
-		prev[level].link.to = elem.links[level].to
-		prev[level].link.width += elem.links[level].width
-	}
-	// Adjust widths at higher levels
-	for ; level < levels; level++ {
-		prev[level].link.width -= 1
-	}
-	l.shrink()
-	return elem
+	return removed
 }
 
 // RemoveN removes any element at position pos in O(log(N)) time,
 // returning it or nil.
 //
-func (l *Skiplist) RemoveN(index int) *Element {
-	if index >= l.cnt {
+func (l *Skiplist) RemoveN(pos int) *Element {
+	pos++
+	if pos > l.cnt {
 		return nil
 	}
-	prev := l.prevsN(index)
-	elem := prev[0].link.to
-	for level := range l.links {
-		if level < len(elem.links) {
-			if level == 0 {
-				// At the bottom level, simply unlink the element.
-				prev[level].link.to = elem.links[level].to
-				continue
-			}
-			prev[level].link.to = elem.links[level].to
-			prev[level].link.width += elem.links[level].width - 1
-			continue
-		}
-		prev[level].link.width -= 1
-	}
+	removed := removeN(&l.links, len(l.links)-1, pos)
 	l.shrink()
-	return elem
+	return removed
+}
+
+func removeN(links *[]link, level int, pos int) (removed *Element) {
+	// Walk to the correct deletion location.
+	for (*links)[level].width < pos {
+		pos -= (*links)[level].width
+		links = &(*links)[level].to.links
+	}
+	// For level 0, simply remove the found Element.
+	if level == 0 {
+		removed = (*links)[0].to
+		(*links)[0].to = removed.links[0].to
+		return removed
+	}
+	// For higher levels, recur.
+	removed = removeN(links, level-1, pos)
+	if removed == (*links)[level].to {
+		// Unlink Element at this level.
+		(*links)[level].to = removed.links[level].to
+		(*links)[level].width += removed.links[level].width - 1
+	} else {
+		// Account for Element not linked at this level.
+		(*links)[level].width -= 1
+	}
+	return removed
 }
 
 // Find returns the youngest element inserted with key in the
@@ -195,12 +211,19 @@ func (l *Skiplist) RemoveN(index int) *Element {
 // It also returns the current position of the found element, or -1.
 //
 func (l *Skiplist) Find(key interface{}) (e *Element, pos int) {
-	prev, pos := l.prevs(key)
-	elem := prev[0].link.to
-	if elem == nil || l.less(key, elem.key) {
+	p := &l.links
+	level := len(l.links) - 1
+	for level >= 0 {
+		for (*p)[level].to != nil && l.less((*p)[level].to.key, key) {
+			pos += (*p)[level].width
+			p = &(*p)[level].to.links
+		}
+		level--
+	}
+	if (*p)[0].to == nil || l.less(key, (*p)[0].to.key) {
 		return nil, -1
 	}
-	return elem, pos
+	return (*p)[0].to, pos
 }
 
 // Len returns the number of elements in the Skiplist.
@@ -209,15 +232,35 @@ func (l *Skiplist) Len() int {
 	return l.cnt
 }
 
-// FindN returns the Element at position pos in the skiplist, in O(log(index)) time.
+// FindN returns the Element at position pos in the skiplist, in O(log(pos)) time.
 // If no such entry exists, nil is returned.
 //
-func (l *Skiplist) FindN(index int) *Element {
-	if index >= l.cnt {
+func (l *Skiplist) FindN(pos int) *Element {
+	if pos >= l.cnt {
 		return nil
 	}
-	prev := l.prevsN(index)
-	return prev[0].link.to
+	pos++
+	p := &l.links
+	levels := len(l.links)
+	// Carefully the start-search level.  If we don't, the search
+	// is technically O(log(l.cnt)) instead of O(log(pos)).
+	level := 0
+	for ; level < levels-1; level++ {
+		if pos < 1<<uint(level) {
+			break
+		}
+	}
+	for level >= 0 {
+		for (*p)[level].to != nil && (*p)[level].width < pos {
+			pos -= (*p)[level].width
+			p = &(*p)[level].to.links
+		}
+		level--
+	}
+	if (*p)[0].to == nil || pos < (*p)[0].width {
+		return nil
+	}
+	return (*p)[0].to
 }
 
 // Function grow increments the list count and increment the number of
@@ -227,66 +270,7 @@ func (l *Skiplist) grow() {
 	l.cnt++
 	if l.cnt&(l.cnt-1) == 0 {
 		l.links = append(l.links, link{nil, l.cnt})
-		l.prev = append(l.prev, prev{})
 	}
-}
-
-type prev struct {
-	link *link
-	pos  int
-}
-
-// Return the previous links to modify, and the insertion position.
-//
-func (s *Skiplist) prevs(key interface{}) ([]prev, int) {
-	levels := len(s.links)
-	prev := s.prev
-	links := &s.links
-	pos := -1
-	for level := levels - 1; level >= 0; level-- {
-		// Find predecessor link at this level
-		for (*links)[level].to != nil && s.less((*links)[level].to.key, key) {
-			pos += (*links)[level].width
-			links = &(*links)[level].to.links
-		}
-		prev[level].pos = pos
-		prev[level].link = &(*links)[level]
-	}
-	pos++
-	return prev, pos
-}
-
-// Return the previous links to modify, by index
-//
-func (s *Skiplist) prevsN(index int) []prev {
-	levels := len(s.links)
-	prev := s.prev
-	links := &s.links
-	pos := 0
-	for level := levels - 1; level >= 0; level-- {
-		// Find predecessor link at this level
-		for (*links)[level].to != nil && (pos+(*links)[level].width <= index) {
-			pos = pos + (*links)[level].width
-			links = &(*links)[level].to.links
-		}
-		prev[level].pos = pos
-		prev[level].link = &(*links)[level]
-	}
-	return prev
-}
-
-// Function randLevels returns a value from N from [0..limit-1] with probability
-// 2^{-n-1}, except the last value is twice as likely.
-//
-func (s *Skiplist) randLevels(max int) int {
-	levels := 1
-	for s.rng.Int63()&0x8000 != 0 {
-		levels++
-	}
-	if levels > max {
-		return max
-	}
-	return levels
 }
 
 // Function shrink decrements the list count and decrement the number
@@ -295,7 +279,6 @@ func (s *Skiplist) randLevels(max int) int {
 func (l *Skiplist) shrink() {
 	if l.cnt&(l.cnt-1) == 0 {
 		l.links = l.links[:len(l.links)-1]
-		l.prev = l.prev[:len(l.prev)-1]
 	}
 	l.cnt--
 }
