@@ -1,0 +1,4 @@
+The Skiplist Authors include:
+
+Glenn Brown contributed the original implementation, interface, and tests.
+Huan Du contributed the remarkable score optimization.
