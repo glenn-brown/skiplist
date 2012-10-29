@@ -1,3 +1,5 @@
+// Copyright 2012 The Skiplist Authors
+
 package skiplist
 
 import "fmt"
