@@ -8,10 +8,10 @@ import "fmt"
 type MyType struct{ a, b int }
 
 // Implement the SlowKey interface:
-func (*MyType) Less(a, b interface{}) bool {
+func (a *MyType) Less(b interface{}) bool {
 	// For example, sort by the sum of the elements in the struct:
-	ma, mb := a.(*MyType), b.(*MyType)
-	return (ma.a + ma.b) < (mb.a + mb.b)
+	mb := b.(*MyType)
+	return (a.a + a.b) < (mb.a + mb.b)
 }
 
 // Any type implementing the SlowKey interface can be used as a key.

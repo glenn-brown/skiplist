@@ -452,7 +452,7 @@ func (l *Skiplist) String() string {
 // as keys.  An a.Less(b) call should return true iff a < b.
 //
 type SlowKey interface {
-	Less(a, b interface{}) bool
+	Less(interface{}) bool
 }
 
 // The FastKey interface allows externally-defined types to be used
@@ -460,7 +460,7 @@ type SlowKey interface {
 // key.Score() must increase monotonically as key increases.
 //
 type FastKey interface {
-	Less(a, b interface{}) bool
+	Less(interface{}) bool
 	Score() float64
 }
 
@@ -473,7 +473,7 @@ func lessFn(key interface{}) func(a, b interface{}) bool {
 	// the interface is present.
 
 	case FastKey, SlowKey:
-		return func(a, b interface{}) bool { return a.(SlowKey).Less(a, b) }
+		return func(a, b interface{}) bool { return a.(SlowKey).Less(b) }
 
 		// Support builtin types.
 
@@ -523,7 +523,7 @@ func greaterFn(key interface{}, descending bool) func(a, b interface{}) bool {
 	// the interface is present.
 
 	case FastKey, SlowKey:
-		return func(a, b interface{}) bool { return b.(SlowKey).Less(b, a) }
+		return func(a, b interface{}) bool { return b.(SlowKey).Less(a) }
 
 		// Support builtin types.
 

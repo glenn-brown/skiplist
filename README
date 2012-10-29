@@ -37,7 +37,7 @@ func (e *Element) String() string
     String returns a Key:Value string representation of the element.
 
 type FastKey interface {
-    Less(a, b interface{}) bool
+    Less(interface{}) bool
     Score() float64
 }
     The FastKey interface allows externally-defined types to be used as
@@ -148,7 +148,7 @@ func (l *Skiplist) String() string
     Function String prints only the key/value pairs in the skip list.
 
 type SlowKey interface {
-    Less(a, b interface{}) bool
+    Less(interface{}) bool
 }
     The SlowKey interface allows externally-defined types to be used as
     keys. An a.Less(b) call should return true iff a < b.

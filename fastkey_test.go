@@ -8,10 +8,10 @@ import "fmt"
 type FastType struct{ a, b int }
 
 // Implement the SlowKey interface:
-func (*FastType) Less(a, b interface{}) bool {
+func (a *FastType) Less(b interface{}) bool {
 	// For example, sort by the sum of the elements in the struct:
-	ma, mb := a.(*FastType), b.(*FastType)
-	return (ma.a + ma.b) < (mb.a + mb.b)
+	mb := b.(*FastType)
+	return (a.a + a.b) < (mb.a + mb.b)
 }
 func (*FastType) Score(i interface{}) float64 {
 	// Score(i) increase monotonically with increasing key value.
