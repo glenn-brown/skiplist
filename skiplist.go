@@ -417,7 +417,7 @@ func (l *Skiplist) prevsN(index int) []prev {
 //
 func (l *Skiplist) randLevels(max int) int {
 	levels := 1
-	for l.rng.Int63()&0x8000 != 0 {
+	for r := l.rng.Int63(); 0 == r&1; r >>= 1 {
 		levels++
 	}
 	if levels > max {
