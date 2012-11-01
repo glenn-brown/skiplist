@@ -82,10 +82,11 @@ func (e *Element) String() string { return fmt.Sprintf("%v:%v", e.key, e.Value) 
 // The list will be sorted from least to greatest key.
 //
 func New() *Skiplist {
-	
+	nu := &Skiplist{}
+
 	// Seed a private random number generator for reproducibility.
-		
-	nu := &Skiplist{0, nil, []link{}, []prev{}, rand.New(rand.NewSource(42)), nil}
+	
+	nu.rng = rand.New(rand.NewSource(42));
 
 	// Arrange to set nu.less and nu.score the first time each is called.
 	// We can't do it here because we can't infer the key type until the first
@@ -105,10 +106,11 @@ func New() *Skiplist {
 // NewDescending is like New, except keys are sorted from greatest to least.
 //
 func NewDescending() *Skiplist {
+	nu := &Skiplist{}
 	
 	// Seed a private random number generator for reproducibility.
 	
-	nu := &Skiplist{0, nil, []link{}, []prev{}, rand.New(rand.NewSource(42)), nil}
+	nu.rng = rand.New(rand.NewSource(42))
 
 	// Arrange to set nu.less and nu.score the first time each is called.
 	// We can't do it here because we can't infer the key type until the first
