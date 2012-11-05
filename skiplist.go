@@ -285,7 +285,7 @@ func (l *Skiplist) RemoveElement(e *Element) *Element {
 
 	levels := len(prevs)
 	for level := 0; level < levels; level++ {
-		for l := prevs[level]; l.pos+l.link.width > pos; {
+		for l := prevs[level]; l.pos+l.link.width < pos; {
 			prevs[level].pos = l.pos + l.link.width
 			prevs[level].link = &l.link.to.links[level]
 		}
