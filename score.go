@@ -24,23 +24,16 @@
 
 package skiplist
 
+// Use up to 8 bytes to generate a score.
 func scoreBytes(data []byte) float64 {
-	l := len(data)
-	
-	// only use first 8 bytes
-	if l > 7 {
-	    data = data[:7]
-	    l = 7
+	l := uint(len(data))
+	if l > 8 {
+		l = 8
 	}
-	
 	var result uint64
-	
-	for i := 0; i < l; i++ {
-	    result |= uint64(data[i])
-	    result <<= 8
+	for i := uint(0); i < l; i++ {
+		result |= uint64(data[i]) << ((7 - i) * 8)
 	}
-	
-	result <<= uint(7-l) * 8
 	return float64(result)
 }
 
