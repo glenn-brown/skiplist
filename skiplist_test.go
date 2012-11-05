@@ -375,6 +375,30 @@ func ExampleSkiplist_String() {
 	// Output: {1:10 2:20 3:30}
 }
 
+// One may Remove() during iteration.
+func ExampleSkiplist_Remove() {
+	skip := New().Insert(1, 10).Insert(2, 20).Insert(3, 30)
+	for e := skip.Front(); nil != e; e = e.Next() {
+		fmt.Println(skip.Remove(e.Key()))
+	}
+	// Output:
+	// 1:10
+	// 2:20
+	// 3:30
+}
+
+// One may RemoveElement() during iteration.
+func ExampleSkiplist_RemoveElement() {
+	skip := New().Insert(1, 10).Insert(2, 20).Insert(3, 30)
+	for e := skip.Front(); nil != e; e = e.Next() {
+		fmt.Println(skip.RemoveElement(e))
+	}
+	// Output:
+	// 1:10
+	// 2:20
+	// 3:30
+}
+
 func TestVisualization(t *testing.T) {
 	s := New()
 	for i := 0; i < 23; i++ {
