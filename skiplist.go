@@ -85,8 +85,8 @@ func New() *Skiplist {
 	nu := &Skiplist{}
 
 	// Seed a private random number generator for reproducibility.
-	
-	nu.rng = rand.New(rand.NewSource(42));
+
+	nu.rng = rand.New(rand.NewSource(42))
 
 	// Arrange to set nu.less and nu.score the first time each is called.
 	// We can't do it here because we can't infer the key type until the first
@@ -107,9 +107,9 @@ func New() *Skiplist {
 //
 func NewDescending() *Skiplist {
 	nu := &Skiplist{}
-	
+
 	// Seed a private random number generator for reproducibility.
-	
+
 	nu.rng = rand.New(rand.NewSource(42))
 
 	// Arrange to set nu.less and nu.score the first time each is called.

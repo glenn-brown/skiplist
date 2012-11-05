@@ -333,7 +333,7 @@ func Example() {
 
 // This example demonstrates iteration over all list elements.
 func ExampleElement_Next() {
-	s := New().Insert(0, 0).Insert(1,1).Insert(1, 2).Insert(2, 4)
+	s := New().Insert(0, 0).Insert(1, 1).Insert(1, 2).Insert(2, 4)
 
 	// Efficiently iterate over all entries:
 	fmt.Print("A")
@@ -347,7 +347,7 @@ func ExampleElement_Next() {
 	for e := s.Element(1); e != nil && e.Key().(int) == 1; e = e.Next() {
 		fmt.Print(" ", e)
 	}
-	
+
 	// Output:
 	// A 0:0 1:2 1:1 2:4
 	// B 1:2 1:1
@@ -359,15 +359,14 @@ func ExampleElement_String() {
 }
 
 func ExampleSkiplist_GetAll() {
-	s := New().Insert(0, 0).Insert(1,1).Insert(1, 2).Insert(2, 4)
-	
+	s := New().Insert(0, 0).Insert(1, 1).Insert(1, 2).Insert(2, 4)
+
 	// Conveniently iterate over values for a single key:
 	for _, ee := range s.GetAll(1) {
 		fmt.Print(" ", ee)
 	}
 	// Output: 2 1
 }
-
 
 func ExampleSkiplist_String() {
 	skip := New().Insert(1, 10).Insert(2, 20).Insert(3, 30)
