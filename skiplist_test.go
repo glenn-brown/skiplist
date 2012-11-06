@@ -90,6 +90,7 @@ func TestSkiplist_Insert(t *testing.T) {
 }
 
 func TestSkiplist_Get(t *testing.T) {
+	t.Parallel()
 	l := skiplist(0, 7)
 	if (l.Get(0).(int) != 0 || l.Get(4).(int) != 8 || l.Get(7).(int) != 14) {
 		t.Fail()
@@ -97,6 +98,7 @@ func TestSkiplist_Get(t *testing.T) {
 }
 
 func TestSkiplist_GetOk(t *testing.T) {
+	t.Parallel()
 	l := skiplist(1, 3)
 	v, ok := l.GetOk(0)
 	if nil != v || false != ok {
@@ -117,6 +119,7 @@ func TestSkiplist_GetOk(t *testing.T) {
 }
 
 func TestSkiplist_GetAll(t *testing.T) {
+	t.Parallel()
 	l := skiplist(1, 3).Insert(2, 3).Insert(2, 5)
 	a := l.GetAll(0)
 	if 0 != len(a) {
@@ -141,6 +144,7 @@ func TestSkiplist_GetAll(t *testing.T) {
 }
 
 func TestSkiplist_Set(t *testing.T) {
+	t.Parallel()
 	l := skiplist(1, 3)
 	l.Set(2, 2)
 	a := l.GetAll(2)
@@ -212,6 +216,7 @@ func TestSkiplist_RemoveN(t *testing.T) {
 }
 
 func TestSkiplist_ElementPos(t *testing.T) {
+	t.Parallel()
 	l := skiplist(1,10)
 	for i:=1; i<10; i++ {
 		e, pos := l.ElementPos(i)
