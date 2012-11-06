@@ -140,6 +140,15 @@ func TestSkiplist_GetAll(t *testing.T) {
 	}
 }
 
+func TestSkiplist_Set(t *testing.T) {
+	l := skiplist(1, 3)
+	l.Set(2, 2)
+	a := l.GetAll(2)
+	if 1 != len(a) || a[0].(int) != 2 {
+		t.Fail()
+	}
+}
+
 func TestSkiplist_RemoveHead(t *testing.T) {
 	t.Parallel()
 	s := skiplist(0, 10)
