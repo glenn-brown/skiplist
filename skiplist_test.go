@@ -149,7 +149,7 @@ func TestSkiplist_Set(t *testing.T) {
 	}
 }
 
-func TestSkiplist_RemoveHead(t *testing.T) {
+func TestSkiplist_Remove(t *testing.T) {
 	t.Parallel()
 	s := skiplist(0, 10)
 	if s.Remove(-1) != nil || s.Remove(11) != nil {
