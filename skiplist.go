@@ -198,6 +198,7 @@ func (l *Skiplist) Get(key interface{}) (value interface{}) {
 // The return value ok is true iff the key was present.
 // If there is no corresponding value, nil and false are returned.
 // If there are multiple corresponding values, the youngest is returned.
+//
 func (l *Skiplist) GetOk(key interface{}) (value interface{}, ok bool) {
 	e, _ := l.ElementPos(key)
 	if nil == e {
@@ -326,6 +327,7 @@ func (l *Skiplist) ElementPos(key interface{}) (e *Element, pos int) {
 // Element returns the youngest list element for key,
 // without modifying the list, in O(log(N)) time.
 // If there is no match, nil is returned.
+//
 func (l *Skiplist) Element(key interface{}) (e *Element) {
 	e, _ = l.ElementPos(key)
 	return e
