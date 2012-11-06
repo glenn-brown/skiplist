@@ -246,6 +246,19 @@ func TestSkiplist_Element_forward(t *testing.T) {
 	}
 }
 
+func TestSkiplist_Pos(t *testing.T) {
+	t.Parallel()
+	l := skiplist(0,4)
+	for i:=0; i<5; i++ {
+		if l.Pos(i) != i {
+			t.Fail()
+		}
+	}
+	if l.Pos(-2) != -1 || l.Pos(5) != -1 {
+		t.Fail()
+	}
+}
+
 func TestSkiplist_Len(t *testing.T) {
 	t.Parallel()
 	s := skiplist(0, 4)
