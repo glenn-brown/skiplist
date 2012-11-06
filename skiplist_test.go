@@ -38,7 +38,7 @@ func TestElement_Key(t *testing.T) {
 
 func TestElement_Next(t *testing.T) {
 	t.Parallel()
-	e := skiplist(1,3).Front()
+	e := skiplist(1, 3).Front()
 	if e.Next().Key().(int) != 2 || e.Next().Next().Key().(int) != 3 {
 		t.Fail()
 	}
@@ -92,7 +92,7 @@ func TestSkiplist_Insert(t *testing.T) {
 func TestSkiplist_Get(t *testing.T) {
 	t.Parallel()
 	l := skiplist(0, 7)
-	if (l.Get(0).(int) != 0 || l.Get(4).(int) != 8 || l.Get(7).(int) != 14) {
+	if l.Get(0).(int) != 0 || l.Get(4).(int) != 8 || l.Get(7).(int) != 14 {
 		t.Fail()
 	}
 }
@@ -179,7 +179,7 @@ func TestSkiplist_Remove(t *testing.T) {
 func TestSkiplist_RemoveElement(t *testing.T) {
 	t.Parallel()
 	l := skiplist(0, 10)
-	for i:=0; i<=10; i+=2 {
+	for i := 0; i <= 10; i += 2 {
 		l.RemoveElement(l.Element(i))
 	}
 	if fmt.Sprintf(l.String()) != "{1:2 3:6 5:10 7:14 9:18}" {
@@ -217,8 +217,8 @@ func TestSkiplist_RemoveN(t *testing.T) {
 
 func TestSkiplist_ElementPos(t *testing.T) {
 	t.Parallel()
-	l := skiplist(1,10)
-	for i:=1; i<10; i++ {
+	l := skiplist(1, 10)
+	for i := 1; i < 10; i++ {
 		e, pos := l.ElementPos(i)
 		if e == nil || pos != i-1 {
 			t.Fail()
@@ -253,8 +253,8 @@ func TestSkiplist_Element_forward(t *testing.T) {
 
 func TestSkiplist_Pos(t *testing.T) {
 	t.Parallel()
-	l := skiplist(0,4)
-	for i:=0; i<5; i++ {
+	l := skiplist(0, 4)
+	for i := 0; i < 5; i++ {
 		if l.Pos(i) != i {
 			t.Fail()
 		}
