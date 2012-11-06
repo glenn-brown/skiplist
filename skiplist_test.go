@@ -36,6 +36,14 @@ func TestElement_Key(t *testing.T) {
 	}
 }
 
+func TestElement_Next(t *testing.T) {
+	t.Parallel()
+	e := skiplist(1,3).Front()
+	if e.Next().Key().(int) != 2 || e.Next().Next().Key().(int) != 3 {
+		t.Fail()
+	}
+}
+
 func TestElement_String(t *testing.T) {
 	t.Parallel()
 	if fmt.Sprint(skiplist(1, 2).Front()) != "1:2" {
