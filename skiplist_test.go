@@ -89,6 +89,33 @@ func TestSkiplist_Insert(t *testing.T) {
 	}
 }
 
+func TestSkiplist_Get(t *testing.T) {
+	l := skiplist(0, 7)
+	if (l.Get(0).(int) != 0 || l.Get(4).(int) != 8 || l.Get(7).(int) != 14) {
+		t.Fail()
+	}
+}
+
+func TestSkiplist_GetOk(t *testing.T) {
+	l := skiplist(1, 3)
+	v, ok := l.GetOk(0)
+	if nil != v || false != ok {
+		t.Fail()
+	}
+	v, ok = l.GetOk(1)
+	if 2 != v.(int) || true != ok {
+		t.Fail()
+	}
+	v, ok = l.GetOk(3)
+	if 6 != v.(int) || true != ok {
+		t.Fail()
+	}
+	v, ok = l.GetOk(4)
+	if nil != v || false != ok {
+		t.Fail()
+	}
+}
+
 func TestSkiplist_RemoveHead(t *testing.T) {
 	t.Parallel()
 	s := skiplist(0, 10)
