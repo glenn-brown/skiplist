@@ -66,6 +66,14 @@ func TestNew(t *testing.T) {
 	}
 }
 
+func TestNewDescending(t *testing.T) {
+	t.Parallel()
+	l := NewDescending().Insert(1, 1).Insert(2, 2).Insert(3, 3)
+	if l.ElementN(0).Value.(int) != 3 || l.ElementN(1).Value.(int) != 2 || l.ElementN(2).Value.(int) != 1 {
+		t.Fail()
+	}
+}
+
 func TestSkiplist_Front(t *testing.T) {
 	t.Parallel()
 	s := skiplist(1, 3)
