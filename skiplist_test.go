@@ -178,7 +178,6 @@ func TestSkiplist_RemoveElement(t *testing.T) {
 	for i:=0; i<=10; i+=2 {
 		l.RemoveElement(l.Element(i))
 	}
-	fmt.Println(l)
 	if fmt.Sprintf(l.String()) != "{1:2 3:6 5:10 7:14 9:18}" {
 		t.Fail()
 	}
@@ -209,6 +208,24 @@ func TestSkiplist_RemoveN(t *testing.T) {
 		if l != cnt {
 			t.Error("bad Len()=", l, "!=", cnt)
 		}
+	}
+}
+
+func TestSkiplist_ElementPos(t *testing.T) {
+	l := skiplist(1,10)
+	for i:=1; i<10; i++ {
+		e, pos := l.ElementPos(i)
+		if e == nil || pos != i-1 {
+			t.Fail()
+		}
+	}
+	e, pos := l.ElementPos(0)
+	if e != nil || pos != -1 {
+		t.Fail()
+	}
+	e, pos = l.ElementPos(11)
+	if e != nil || pos != -1 {
+		t.Fail()
 	}
 }
 
