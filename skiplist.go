@@ -1,4 +1,4 @@
-// Copyright 2012 The Skiplist Authors
+// Copyright (c) 2012, Glenn Brown.  All rights reserved.  See LICENSE.
 
 // Package skiplist implements fast indexable ordered multimaps.
 //
@@ -20,6 +20,7 @@ package skiplist
 import (
 	"bytes"
 	"fmt"
+	"github.com/glenn-brown/ordinal"
 	"math/rand"
 )
 
@@ -88,16 +89,16 @@ func New() *Skiplist {
 
 	nu.rng = rand.New(rand.NewSource(42))
 
-	// Arrange to set nu.less and nu.score the first time each is called.
+	// Arrange to set nu.less and nu.score the first time either is called.
 	// We can't do it here because we can't infer the key type until the first
 	// key is inserted.
 
 	nu.less = func(a, b interface{}) bool {
-		nu.less = lessFn(a)
+		nu.less, nu.score = ordinal.Fns(a)
 		return nu.less(a, b)
 	}
 	nu.score = func(a interface{}) float64 {
-		nu.score = scoreFn(a)
+		nu.less, nu.score = ordinal.Fns(a)
 		return nu.score(a)
 	}
 	return nu
@@ -112,16 +113,16 @@ func NewDescending() *Skiplist {
 
 	nu.rng = rand.New(rand.NewSource(42))
 
-	// Arrange to set nu.less and nu.score the first time each is called.
+	// Arrange to set nu.less and nu.score the first time either is called.
 	// We can't do it here because we can't infer the key type until the first
 	// key is inserted.
 
 	nu.less = func(a, b interface{}) bool {
-		nu.less = greaterFn(a, true)
+		nu.less, nu.score = ordinal.FnsReversed(a)
 		return nu.less(a, b)
 	}
 	nu.score = func(a interface{}) float64 {
-		nu.score = negativeScoreFn(a)
+		nu.less, nu.score = ordinal.FnsReversed(a)
 		return nu.score(a)
 	}
 	return nu

@@ -1,4 +1,4 @@
-// Copyright 2012 The Skiplist Authors
+// Copyright (c) 2012, Glenn Brown.  All rights reserved.  See LICENSE.
 
 package skiplist
 
