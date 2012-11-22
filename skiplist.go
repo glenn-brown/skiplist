@@ -346,7 +346,7 @@ func (l *T) Pos(key interface{}) (pos int) {
 	return pos
 }
 
-// Len returns the number of elements in the T.
+// Len returns the number of elements in the skiplist.
 //
 func (l *T) Len() int {
 	return l.cnt

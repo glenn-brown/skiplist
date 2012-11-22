@@ -44,15 +44,21 @@ type FastKey interface {
     keys, efficiently. An a.Less(b) call should return true iff a < b.
     key.Score() must increase monotonically as key increases.
 
-type Skiplist struct {
+type SlowKey interface {
+    Less(interface{}) bool
+}
+    The SlowKey interface allows externally-defined types to be used as
+    keys. An a.Less(b) call should return true iff a < b.
+
+type T struct {
     // contains filtered or unexported fields
 }
-    A Skiplist is linked at multiple levels. The bottom level (L0) is a
-    sorted linked list of entries, and each link has a link at the next
-    higher level added with probability P at insertion. Since this is a
-    position-addressable skip-list, each link has an associated 'width'
-    specifying the number of nodes it skips, so nodes can also be referenced
-    by position.
+    A skiplist.T is a skiplist. A skiplist is linked at multiple levels. The
+    bottom level (L0) is a sorted linked list of entries, and each link has
+    a link at the next higher level added with probability P at insertion.
+    Since this is a position-addressable skip-list, each link has an
+    associated 'width' specifying the number of nodes it skips, so nodes can
+    also be referenced by position.
 
     For example, a skiplist containing values from 0 to 0x16 might be
     structured like this:
@@ -69,32 +75,32 @@ type Skiplist struct {
     as possible without passing the desired Element, dropping down one
     level, and repeating for each level.
 
-func New() *Skiplist
+func New() *T
     New returns a new skiplist in O(1) time. The list will be sorted from
     least to greatest key.
 
-func NewDescending() *Skiplist
+func NewDescending() *T
     NewDescending is like New, except keys are sorted from greatest to
     least.
 
-func (l *Skiplist) Element(key interface{}) (e *Element)
+func (l *T) Element(key interface{}) (e *Element)
     Element returns the youngest list element for key, without modifying the
     list, in O(log(N)) time. If there is no match, nil is returned.
 
-func (l *Skiplist) ElementN(index int) *Element
+func (l *T) ElementN(index int) *Element
     ElementN returns the Element at position pos in the skiplist, in
     O(log(index)) time. If no such entry exists, nil is returned.
 
-func (l *Skiplist) ElementPos(key interface{}) (e *Element, pos int)
+func (l *T) ElementPos(key interface{}) (e *Element, pos int)
     Element returns the youngest list element for key and its position, If
     there is no match, nil and -1 are returned.
 
     Consider using Get or GetAll instead if you only want Values.
 
-func (l *Skiplist) Front() *Element
+func (l *T) Front() *Element
     Return the first list element in O(1) time.
 
-func (l *Skiplist) Get(key interface{}) (value interface{})
+func (l *T) Get(key interface{}) (value interface{})
     Get returns the value corresponding to key in the table in O(log(N))
     time. If there is no corresponding value, nil is returned. If there are
     multiple corresponding values, the youngest is returned.
@@ -102,55 +108,49 @@ func (l *Skiplist) Get(key interface{}) (value interface{})
     If the list might contain an nil value, you may want to use GetOk
     instead.
 
-func (l *Skiplist) GetAll(key interface{}) (values []interface{})
+func (l *T) GetAll(key interface{}) (values []interface{})
     GetAll returns all values coresponding to key in the list, starting with
     the youngest. If no value corresponds, an empty slice is returned.
     O(log(N)+V) time is required, where M is the number of values returned.
 
-func (l *Skiplist) GetOk(key interface{}) (value interface{}, ok bool)
+func (l *T) GetOk(key interface{}) (value interface{}, ok bool)
     GetOk returns the value corresponding to key in the table in O(log(N))
     time. The return value ok is true iff the key was present. If there is
     no corresponding value, nil and false are returned. If there are
     multiple corresponding values, the youngest is returned.
 
-func (l *Skiplist) Insert(key interface{}, value interface{}) *Skiplist
+func (l *T) Insert(key interface{}, value interface{}) *T
     Insert a {key,value} pair into the skip list in O(log(N)) time.
 
-func (l *Skiplist) Len() int
-    Len returns the number of elements in the Skiplist.
+func (l *T) Len() int
+    Len returns the number of elements in the T.
 
-func (l *Skiplist) Pos(key interface{}) (pos int)
+func (l *T) Pos(key interface{}) (pos int)
     ElementPos returns the position of the youngest list element for key,
     without modifying the list, in O(log(N)) time. If there is no match, -1
     is returned.
 
     Consider using Get or GetAll instead if you only want Values.
 
-func (l *Skiplist) Remove(key interface{}) *Element
+func (l *T) Remove(key interface{}) *Element
     Remove the youngest Element associate with Key, if any, in O(log(N))
     time. Return the removed element or nil.
 
-func (l *Skiplist) RemoveElement(e *Element) *Element
+func (l *T) RemoveElement(e *Element) *Element
     Remove the specified element from the table, in O(log(N)) time. If the
     element is one of M multiple entries for the key, and additional O(M)
     time is required. This is useful for removing a specific element in a
     multimap, or removing elements during iteration.
 
-func (l *Skiplist) RemoveN(index int) *Element
+func (l *T) RemoveN(index int) *Element
     RemoveN removes any element at position pos in O(log(N)) time, returning
     it or nil.
 
-func (l *Skiplist) Set(key interface{}, value interface{}) *Skiplist
+func (l *T) Set(key interface{}, value interface{}) *T
     Insert a {key,value} pair into the skip list in O(log(N)) time,
     replacing the youngest entry for key, if any.
 
-func (l *Skiplist) String() string
+func (l *T) String() string
     Function String prints only the key/value pairs in the skip list.
-
-type SlowKey interface {
-    Less(interface{}) bool
-}
-    The SlowKey interface allows externally-defined types to be used as
-    keys. An a.Less(b) call should return true iff a < b.
 
 
