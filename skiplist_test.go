@@ -159,7 +159,7 @@ func TestT_Remove(t *testing.T) {
 	if s.Remove(-1) != nil || s.Remove(11) != nil {
 		t.Error("Removing nonexistant key should fail.")
 	}
-	for i := range shuffleRange(0, 10) {
+	for i := range rand.Perm(11) {
 		e := s.Remove(i)
 		if e == nil {
 			t.Error("nil")
@@ -190,7 +190,7 @@ func TestT_RemoveElement(t *testing.T) {
 func TestT_RemoveN(t *testing.T) {
 	t.Parallel()
 	s := skiplist(0, 10)
-	keys := shuffleRange(0, 10)
+	keys := rand.Perm(11)
 	cnt := 11
 	for _, key := range keys {
 		found, pos := s.ElementPos(key)
@@ -564,7 +564,7 @@ func BenchmarkT_Insert_reverse(b *testing.B) {
 
 func BenchmarkT_Insert_shuffle(b *testing.B) {
 	b.StopTimer()
-	a := shuffleRange(0, b.N-1)
+	a := rand.Perm(b.N)
 	s := New()
 	b.StartTimer()
 	for i, key := range a {
@@ -598,7 +598,7 @@ func BenchmarkT_Element_reverse(b *testing.B) {
 
 func BenchmarkT_Element_shuffle(b *testing.B) {
 	b.StopTimer()
-	a := shuffleRange(0, b.N-1)
+	a := rand.Perm(b.N)
 	s := skiplist(0, b.N-1)
 	b.StartTimer()
 	for _, key := range a {
@@ -632,7 +632,7 @@ func BenchmarkT_ElementN_reverse(b *testing.B) {
 
 func BenchmarkT_ElementN_shuffle(b *testing.B) {
 	b.StopTimer()
-	a := shuffleRange(0, b.N-1)
+	a := rand.Perm(b.N)
 	s := skiplist(0, b.N-1)
 	b.StartTimer()
 	for _, key := range a {
@@ -666,7 +666,7 @@ func BenchmarkT_Remove_reverse(b *testing.B) {
 
 func BenchmarkT_Remove_shuffle(b *testing.B) {
 	b.StopTimer()
-	a := shuffleRange(0, b.N-1)
+	a := rand.Perm(b.N)
 	s := skiplist(0, b.N-1)
 	b.StartTimer()
 	for _, key := range a {
@@ -711,26 +711,12 @@ func BenchmarkT_RemoveN_mid(b *testing.B) {
 // Utility functions
 ////////////////////////////////////////////////////////////////
 
-// Create a shuffled slice of the integers in [min,max].
-//
-func shuffleRange(min, max int) []int {
-	a := make([]int, max-min+1)
-	for i := range a {
-		a[i] = min + i
-	}
-	for i := range a {
-		other := rand.Intn(max - min + 1)
-		a[i], a[other] = a[other], a[i]
-	}
-	return a
-}
-
 // Create a skiplist with each key in [min,max].
 //
 func skiplist(min, max int) *T {
 	s := New()
-	for _, v := range shuffleRange(min, max) {
-		s.Insert(v, 2*v)
+	for _, v := range rand.Perm(max - min + 1) {
+		s.Insert((min + v), 2*(min+v))
 	}
 	return s
 }
