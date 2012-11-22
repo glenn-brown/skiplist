@@ -24,12 +24,13 @@ import (
 	"math/rand"
 )
 
-// A Skiplist is linked at multiple levels.  The bottom level (L0) is
-// a sorted linked list of entries, and each link has a link at the
-// next higher level added with probability P at insertion.  Since
-// this is a position-addressable skip-list, each link has an
-// associated 'width' specifying the number of nodes it skips, so
-// nodes can also be referenced by position.
+// A skiplist.T is a skiplist.  A skiplist is linked at multiple
+// levels.  The bottom level (L0) is a sorted linked list of entries,
+// and each link has a link at the next higher level added with
+// probability P at insertion.  Since this is a position-addressable
+// skip-list, each link has an associated 'width' specifying the
+// number of nodes it skips, so nodes can also be referenced by
+// position.
 //
 // For example, a skiplist containing values from 0 to 0x16 might be structured
 // like this:
@@ -44,7 +45,7 @@ import (
 // without passing the desired Element, dropping down one level, and repeating for 
 // each level.	
 //
-type Skiplist struct {
+type T struct {
 	cnt   int
 	less  func(a, b interface{}) bool
 	links []link
@@ -82,8 +83,8 @@ func (e *Element) String() string { return fmt.Sprintf("%v:%v", e.key, e.Value) 
 // New returns a new skiplist in O(1) time.
 // The list will be sorted from least to greatest key.
 //
-func New() *Skiplist {
-	nu := &Skiplist{}
+func New() *T {
+	nu := &T{}
 
 	// Seed a private random number generator for reproducibility.
 
@@ -106,8 +107,8 @@ func New() *Skiplist {
 
 // NewDescending is like New, except keys are sorted from greatest to least.
 //
-func NewDescending() *Skiplist {
-	nu := &Skiplist{}
+func NewDescending() *T {
+	nu := &T{}
 
 	// Seed a private random number generator for reproducibility.
 
@@ -130,7 +131,7 @@ func NewDescending() *Skiplist {
 
 // Return the first list element in O(1) time.
 //
-func (l *Skiplist) Front() *Element {
+func (l *T) Front() *Element {
 	if len(l.links) == 0 {
 		return nil
 	}
@@ -139,7 +140,7 @@ func (l *Skiplist) Front() *Element {
 
 // Insert a {key,value} pair in the skiplist, optionally replacing the youngest previous entry.
 //
-func (l *Skiplist) insert(key interface{}, value interface{}, replace bool) *Skiplist {
+func (l *T) insert(key interface{}, value interface{}, replace bool) *T {
 	l.grow()
 	s := l.score(key)
 	prev, pos := l.prevs(key, s)
@@ -177,7 +178,7 @@ func (l *Skiplist) insert(key interface{}, value interface{}, replace bool) *Ski
 
 // Insert a {key,value} pair into the skip list in O(log(N)) time.
 //
-func (l *Skiplist) Insert(key interface{}, value interface{}) *Skiplist {
+func (l *T) Insert(key interface{}, value interface{}) *T {
 	return l.insert(key, value, false)
 }
 
@@ -187,7 +188,7 @@ func (l *Skiplist) Insert(key interface{}, value interface{}) *Skiplist {
 //
 // If the list might contain an nil value, you may want to use GetOk instead.
 //
-func (l *Skiplist) Get(key interface{}) (value interface{}) {
+func (l *T) Get(key interface{}) (value interface{}) {
 	e, _ := l.ElementPos(key)
 	if nil == e {
 		return nil
@@ -200,7 +201,7 @@ func (l *Skiplist) Get(key interface{}) (value interface{}) {
 // If there is no corresponding value, nil and false are returned.
 // If there are multiple corresponding values, the youngest is returned.
 //
-func (l *Skiplist) GetOk(key interface{}) (value interface{}, ok bool) {
+func (l *T) GetOk(key interface{}) (value interface{}, ok bool) {
 	e, _ := l.ElementPos(key)
 	if nil == e {
 		return nil, false
@@ -212,7 +213,7 @@ func (l *Skiplist) GetOk(key interface{}) (value interface{}, ok bool) {
 // If no value corresponds, an empty slice is returned.
 // O(log(N)+V) time is required, where M is the number of values returned.
 //
-func (l *Skiplist) GetAll(key interface{}) (values []interface{}) {
+func (l *T) GetAll(key interface{}) (values []interface{}) {
 	s := l.score(key)
 	prevs, _ := l.prevs(key, s)
 	e := prevs[0].link.to
@@ -226,14 +227,14 @@ func (l *Skiplist) GetAll(key interface{}) (values []interface{}) {
 // Insert a {key,value} pair into the skip list in O(log(N)) time, replacing the youngest entry
 // for key, if any.
 //
-func (l *Skiplist) Set(key interface{}, value interface{}) *Skiplist {
+func (l *T) Set(key interface{}, value interface{}) *T {
 	return l.insert(key, value, true)
 }
 
 // Function remove removes Element elem from a list.  Parameter prevs must be
 // the precomputed predecessor list for the element.
 //
-func (l *Skiplist) remove(prev []prev, elem *Element) *Element {
+func (l *T) remove(prev []prev, elem *Element) *Element {
 	// At the bottom level, simply unlink the element.
 	prev[0].link.to = elem.links[0].to
 	// Unlink any higher linked levels.
@@ -254,7 +255,7 @@ func (l *Skiplist) remove(prev []prev, elem *Element) *Element {
 // Remove the youngest Element associate with Key, if any, in O(log(N)) time.
 // Return the removed element or nil.
 //
-func (l *Skiplist) Remove(key interface{}) *Element {
+func (l *T) Remove(key interface{}) *Element {
 	s := l.score(key)
 	prevs, _ := l.prevs(key, s)
 	// Verify there is a matching entry to remove.
@@ -269,7 +270,7 @@ func (l *Skiplist) Remove(key interface{}) *Element {
 // If the element is one of M multiple entries for the key, and additional O(M) time is required.
 // This is useful for removing a specific element in a multimap, or removing elements during iteration.
 //
-func (l *Skiplist) RemoveElement(e *Element) *Element {
+func (l *T) RemoveElement(e *Element) *Element {
 
 	// Find the first element in the multimap group.
 
@@ -301,7 +302,7 @@ func (l *Skiplist) RemoveElement(e *Element) *Element {
 // RemoveN removes any element at position pos in O(log(N)) time,
 // returning it or nil.
 //
-func (l *Skiplist) RemoveN(index int) *Element {
+func (l *T) RemoveN(index int) *Element {
 	if index >= l.cnt {
 		return nil
 	}
@@ -315,7 +316,7 @@ func (l *Skiplist) RemoveN(index int) *Element {
 //
 // Consider using Get or GetAll instead if you only want Values.
 //
-func (l *Skiplist) ElementPos(key interface{}) (e *Element, pos int) {
+func (l *T) ElementPos(key interface{}) (e *Element, pos int) {
 	s := l.score(key)
 	prev, pos := l.prevs(key, s)
 	elem := prev[0].link.to
@@ -329,7 +330,7 @@ func (l *Skiplist) ElementPos(key interface{}) (e *Element, pos int) {
 // without modifying the list, in O(log(N)) time.
 // If there is no match, nil is returned.
 //
-func (l *Skiplist) Element(key interface{}) (e *Element) {
+func (l *T) Element(key interface{}) (e *Element) {
 	e, _ = l.ElementPos(key)
 	return e
 }
@@ -340,21 +341,21 @@ func (l *Skiplist) Element(key interface{}) (e *Element) {
 //
 // Consider using Get or GetAll instead if you only want Values.
 //
-func (l *Skiplist) Pos(key interface{}) (pos int) {
+func (l *T) Pos(key interface{}) (pos int) {
 	_, pos = l.ElementPos(key)
 	return pos
 }
 
-// Len returns the number of elements in the Skiplist.
+// Len returns the number of elements in the T.
 //
-func (l *Skiplist) Len() int {
+func (l *T) Len() int {
 	return l.cnt
 }
 
 // ElementN returns the Element at position pos in the skiplist, in O(log(index)) time.
 // If no such entry exists, nil is returned.
 //
-func (l *Skiplist) ElementN(index int) *Element {
+func (l *T) ElementN(index int) *Element {
 	if index >= l.cnt {
 		return nil
 	}
@@ -365,7 +366,7 @@ func (l *Skiplist) ElementN(index int) *Element {
 // Function grow increments the list count and increment the number of
 // levels on power-of-two counts.
 //
-func (l *Skiplist) grow() {
+func (l *T) grow() {
 	l.cnt++
 	if l.cnt&(l.cnt-1) == 0 {
 		l.links = append(l.links, link{nil, l.cnt})
@@ -380,7 +381,7 @@ type prev struct {
 
 // Return the previous links to modify, and the insertion position.
 //
-func (l *Skiplist) prevs(key interface{}, s float64) ([]prev, int) {
+func (l *T) prevs(key interface{}, s float64) ([]prev, int) {
 	levels := len(l.links)
 	prev := l.prev
 	links := &l.links
@@ -400,7 +401,7 @@ func (l *Skiplist) prevs(key interface{}, s float64) ([]prev, int) {
 
 // Return the previous links to modify, by index
 //
-func (l *Skiplist) prevsN(index int) []prev {
+func (l *T) prevsN(index int) []prev {
 	levels := len(l.links)
 	prev := l.prev
 	links := &l.links
@@ -420,7 +421,7 @@ func (l *Skiplist) prevsN(index int) []prev {
 // Function randLevels returns a value from N from [0..limit-1] with probability
 // 2^{-n-1}, except the last value is twice as likely.
 //
-func (l *Skiplist) randLevels(max int) int {
+func (l *T) randLevels(max int) int {
 	levels := 1
 	for r := l.rng.Int63(); 0 == r&1; r >>= 1 {
 		levels++
@@ -434,7 +435,7 @@ func (l *Skiplist) randLevels(max int) int {
 // Function shrink decrements the list count and decrement the number
 // of levels on power-of-two counts.
 //
-func (l *Skiplist) shrink() {
+func (l *T) shrink() {
 	if l.cnt&(l.cnt-1) == 0 {
 		l.links = l.links[:len(l.links)-1]
 		l.prev = l.prev[:len(l.prev)-1]
@@ -444,7 +445,7 @@ func (l *Skiplist) shrink() {
 
 // Function String prints only the key/value pairs in the skip list.
 //
-func (l *Skiplist) String() string {
+func (l *T) String() string {
 	s := append([]byte{}, "{"...)
 	for n := l.links[0].to; n != nil; n = n.links[0].to {
 		s = append(s, (n.String() + " ")...)

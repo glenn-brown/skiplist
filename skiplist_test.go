@@ -13,7 +13,7 @@ import (
 // Tests
 ////////////////////////////////////////////////////////////////
 
-func TestSkiplist(t *testing.T) {
+func TestT(t *testing.T) {
 	t.Parallel()
 	s := skiplist(1, 20)
 	i := 1
@@ -74,7 +74,7 @@ func TestNewDescending(t *testing.T) {
 	}
 }
 
-func TestSkiplist_Front(t *testing.T) {
+func TestT_Front(t *testing.T) {
 	t.Parallel()
 	s := skiplist(1, 3)
 	if s.Front().Key().(int) != 1 {
@@ -82,14 +82,14 @@ func TestSkiplist_Front(t *testing.T) {
 	}
 }
 
-func TestSkiplist_Insert(t *testing.T) {
+func TestT_Insert(t *testing.T) {
 	t.Parallel()
 	if skiplist(1, 10).String() != "{1:2 2:4 3:6 4:8 5:10 6:12 7:14 8:16 9:18 10:20}" {
 		t.Fail()
 	}
 }
 
-func TestSkiplist_Get(t *testing.T) {
+func TestT_Get(t *testing.T) {
 	t.Parallel()
 	l := skiplist(0, 7)
 	if l.Get(0).(int) != 0 || l.Get(4).(int) != 8 || l.Get(7).(int) != 14 {
@@ -97,7 +97,7 @@ func TestSkiplist_Get(t *testing.T) {
 	}
 }
 
-func TestSkiplist_GetOk(t *testing.T) {
+func TestT_GetOk(t *testing.T) {
 	t.Parallel()
 	l := skiplist(1, 3)
 	v, ok := l.GetOk(0)
@@ -118,7 +118,7 @@ func TestSkiplist_GetOk(t *testing.T) {
 	}
 }
 
-func TestSkiplist_GetAll(t *testing.T) {
+func TestT_GetAll(t *testing.T) {
 	t.Parallel()
 	l := skiplist(1, 3).Insert(2, 3).Insert(2, 5)
 	a := l.GetAll(0)
@@ -143,7 +143,7 @@ func TestSkiplist_GetAll(t *testing.T) {
 	}
 }
 
-func TestSkiplist_Set(t *testing.T) {
+func TestT_Set(t *testing.T) {
 	t.Parallel()
 	l := skiplist(1, 3)
 	l.Set(2, 2)
@@ -153,7 +153,7 @@ func TestSkiplist_Set(t *testing.T) {
 	}
 }
 
-func TestSkiplist_Remove(t *testing.T) {
+func TestT_Remove(t *testing.T) {
 	t.Parallel()
 	s := skiplist(0, 10)
 	if s.Remove(-1) != nil || s.Remove(11) != nil {
@@ -176,7 +176,7 @@ func TestSkiplist_Remove(t *testing.T) {
 	}
 }
 
-func TestSkiplist_RemoveElement(t *testing.T) {
+func TestT_RemoveElement(t *testing.T) {
 	t.Parallel()
 	l := skiplist(0, 10)
 	for i := 0; i <= 10; i += 2 {
@@ -187,7 +187,7 @@ func TestSkiplist_RemoveElement(t *testing.T) {
 	}
 }
 
-func TestSkiplist_RemoveN(t *testing.T) {
+func TestT_RemoveN(t *testing.T) {
 	t.Parallel()
 	s := skiplist(0, 10)
 	keys := shuffleRange(0, 10)
@@ -215,7 +215,7 @@ func TestSkiplist_RemoveN(t *testing.T) {
 	}
 }
 
-func TestSkiplist_ElementPos(t *testing.T) {
+func TestT_ElementPos(t *testing.T) {
 	t.Parallel()
 	l := skiplist(1, 10)
 	for i := 1; i < 10; i++ {
@@ -234,7 +234,7 @@ func TestSkiplist_ElementPos(t *testing.T) {
 	}
 }
 
-func TestSkiplist_Element_forward(t *testing.T) {
+func TestT_Element_forward(t *testing.T) {
 	t.Parallel()
 	s := skiplist(0, 9)
 	for i := s.Len() - 1; i >= 0; i-- {
@@ -251,7 +251,7 @@ func TestSkiplist_Element_forward(t *testing.T) {
 	}
 }
 
-func TestSkiplist_Pos(t *testing.T) {
+func TestT_Pos(t *testing.T) {
 	t.Parallel()
 	l := skiplist(0, 4)
 	for i := 0; i < 5; i++ {
@@ -264,7 +264,7 @@ func TestSkiplist_Pos(t *testing.T) {
 	}
 }
 
-func TestSkiplist_Len(t *testing.T) {
+func TestT_Len(t *testing.T) {
 	t.Parallel()
 	s := skiplist(0, 4)
 	if s.Len() != 5 {
@@ -272,7 +272,7 @@ func TestSkiplist_Len(t *testing.T) {
 	}
 }
 
-func TestSkiplist_ElementN(t *testing.T) {
+func TestT_ElementN(t *testing.T) {
 	t.Parallel()
 	s := skiplist(0, 9)
 	for i := s.Len() - 1; i >= 0; i-- {
@@ -481,7 +481,7 @@ func ExampleElement_String() {
 	// Output: key1:value1
 }
 
-func ExampleSkiplist_GetAll() {
+func ExampleT_GetAll() {
 	s := New().Insert(0, 0).Insert(1, 1).Insert(1, 2).Insert(2, 4)
 
 	// Conveniently iterate over values for a single key:
@@ -491,14 +491,14 @@ func ExampleSkiplist_GetAll() {
 	// Output: 2 1
 }
 
-func ExampleSkiplist_String() {
+func ExampleT_String() {
 	skip := New().Insert(1, 10).Insert(2, 20).Insert(3, 30)
 	fmt.Println(skip)
 	// Output: {1:10 2:20 3:30}
 }
 
 // One may Remove() during iteration.
-func ExampleSkiplist_Remove() {
+func ExampleT_Remove() {
 	skip := New().Insert(1, 10).Insert(2, 20).Insert(3, 30)
 	for e := skip.Front(); nil != e; e = e.Next() {
 		fmt.Println(skip.Remove(e.Key()))
@@ -510,7 +510,7 @@ func ExampleSkiplist_Remove() {
 }
 
 // One may RemoveElement() during iteration.
-func ExampleSkiplist_RemoveElement() {
+func ExampleT_RemoveElement() {
 	skip := New().Insert(1, 10).Insert(2, 20).Insert(3, 30)
 	for e := skip.Front(); nil != e; e = e.Next() {
 		fmt.Println(skip.RemoveElement(e))
@@ -544,7 +544,7 @@ func TestVisualization(t *testing.T) {
 // Benchmarks
 ////////////////////////////////////////////////////////////////
 
-func BenchmarkSkiplist_Insert_forward(b *testing.B) {
+func BenchmarkT_Insert_forward(b *testing.B) {
 	b.StopTimer()
 	s := New()
 	b.StartTimer()
@@ -553,7 +553,7 @@ func BenchmarkSkiplist_Insert_forward(b *testing.B) {
 	}
 }
 
-func BenchmarkSkiplist_Insert_reverse(b *testing.B) {
+func BenchmarkT_Insert_reverse(b *testing.B) {
 	b.StopTimer()
 	s := New()
 	b.StartTimer()
@@ -562,7 +562,7 @@ func BenchmarkSkiplist_Insert_reverse(b *testing.B) {
 	}
 }
 
-func BenchmarkSkiplist_Insert_shuffle(b *testing.B) {
+func BenchmarkT_Insert_shuffle(b *testing.B) {
 	b.StopTimer()
 	a := shuffleRange(0, b.N-1)
 	s := New()
@@ -572,7 +572,7 @@ func BenchmarkSkiplist_Insert_shuffle(b *testing.B) {
 	}
 }
 
-func BenchmarkSkiplist_Element_forward(b *testing.B) {
+func BenchmarkT_Element_forward(b *testing.B) {
 	b.StopTimer()
 	s := New()
 	for i := b.N - 1; i >= 0; i-- {
@@ -584,7 +584,7 @@ func BenchmarkSkiplist_Element_forward(b *testing.B) {
 	}
 }
 
-func BenchmarkSkiplist_Element_reverse(b *testing.B) {
+func BenchmarkT_Element_reverse(b *testing.B) {
 	b.StopTimer()
 	s := New()
 	for i := 0; i < b.N; i++ {
@@ -596,7 +596,7 @@ func BenchmarkSkiplist_Element_reverse(b *testing.B) {
 	}
 }
 
-func BenchmarkSkiplist_Element_shuffle(b *testing.B) {
+func BenchmarkT_Element_shuffle(b *testing.B) {
 	b.StopTimer()
 	a := shuffleRange(0, b.N-1)
 	s := skiplist(0, b.N-1)
@@ -606,7 +606,7 @@ func BenchmarkSkiplist_Element_shuffle(b *testing.B) {
 	}
 }
 
-func BenchmarkSkiplist_ElementN_forward(b *testing.B) {
+func BenchmarkT_ElementN_forward(b *testing.B) {
 	b.StopTimer()
 	s := New()
 	for i := b.N - 1; i >= 0; i-- {
@@ -618,7 +618,7 @@ func BenchmarkSkiplist_ElementN_forward(b *testing.B) {
 	}
 }
 
-func BenchmarkSkiplist_ElementN_reverse(b *testing.B) {
+func BenchmarkT_ElementN_reverse(b *testing.B) {
 	b.StopTimer()
 	s := New()
 	for i := 0; i < b.N; i++ {
@@ -630,7 +630,7 @@ func BenchmarkSkiplist_ElementN_reverse(b *testing.B) {
 	}
 }
 
-func BenchmarkSkiplist_ElementN_shuffle(b *testing.B) {
+func BenchmarkT_ElementN_shuffle(b *testing.B) {
 	b.StopTimer()
 	a := shuffleRange(0, b.N-1)
 	s := skiplist(0, b.N-1)
@@ -640,7 +640,7 @@ func BenchmarkSkiplist_ElementN_shuffle(b *testing.B) {
 	}
 }
 
-func BenchmarkSkiplist_Remove_forward(b *testing.B) {
+func BenchmarkT_Remove_forward(b *testing.B) {
 	b.StopTimer()
 	s := New()
 	for i := b.N - 1; i >= 0; i-- {
@@ -652,7 +652,7 @@ func BenchmarkSkiplist_Remove_forward(b *testing.B) {
 	}
 }
 
-func BenchmarkSkiplist_Remove_reverse(b *testing.B) {
+func BenchmarkT_Remove_reverse(b *testing.B) {
 	b.StopTimer()
 	s := New()
 	for i := 0; i < b.N; i++ {
@@ -664,7 +664,7 @@ func BenchmarkSkiplist_Remove_reverse(b *testing.B) {
 	}
 }
 
-func BenchmarkSkiplist_Remove_shuffle(b *testing.B) {
+func BenchmarkT_Remove_shuffle(b *testing.B) {
 	b.StopTimer()
 	a := shuffleRange(0, b.N-1)
 	s := skiplist(0, b.N-1)
@@ -674,7 +674,7 @@ func BenchmarkSkiplist_Remove_shuffle(b *testing.B) {
 	}
 }
 
-func BenchmarkSkiplist_RemoveN_head(b *testing.B) {
+func BenchmarkT_RemoveN_head(b *testing.B) {
 	b.StopTimer()
 	s := New()
 	for i := b.N - 1; i >= 0; i-- {
@@ -686,7 +686,7 @@ func BenchmarkSkiplist_RemoveN_head(b *testing.B) {
 	}
 }
 
-func BenchmarkSkiplist_RemoveN_tail(b *testing.B) {
+func BenchmarkT_RemoveN_tail(b *testing.B) {
 	b.StopTimer()
 	s := New()
 	for i := 0; i < b.N; i++ {
@@ -698,7 +698,7 @@ func BenchmarkSkiplist_RemoveN_tail(b *testing.B) {
 	}
 }
 
-func BenchmarkSkiplist_RemoveN_mid(b *testing.B) {
+func BenchmarkT_RemoveN_mid(b *testing.B) {
 	b.StopTimer()
 	s := skiplist(0, b.N-1)
 	b.StartTimer()
@@ -725,9 +725,9 @@ func shuffleRange(min, max int) []int {
 	return a
 }
 
-// Create a Skiplist with each key in [min,max].
+// Create a skiplist with each key in [min,max].
 //
-func skiplist(min, max int) *Skiplist {
+func skiplist(min, max int) *T {
 	s := New()
 	for _, v := range shuffleRange(min, max) {
 		s.Insert(v, 2*v)
@@ -758,7 +758,7 @@ func arrow(cnt int) (s string) {
 //         0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  1  1  1  1  1  1  1  
 //         0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f  0  1  2  3  4  5  6
 //
-func (l *Skiplist) visualization() (s string) {
+func (l *T) visualization() (s string) {
 	for level := len(l.links) - 1; level >= 0; level-- {
 		s += fmt.Sprintf("L%d ", level)
 		w := l.links[level].width
