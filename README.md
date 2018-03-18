@@ -1,6 +1,6 @@
 # In this fork bugs are corrected.
 
-
+<pre>
 package skiplist
     import "github.com/pashaosipyants/skiplist"
 
@@ -155,3 +155,4 @@ func (l *T) String() string
     Function String prints only the key/value pairs in the skip list.
 
 
+</pre>
