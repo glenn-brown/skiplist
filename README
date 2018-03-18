@@ -1,7 +1,7 @@
-PACKAGE
+#In this fork bugs are corrected.
 
 package skiplist
-    import "github.com/glenn-brown/skiplist"
+    import "github.com/pashaosipyants/skiplist"
 
     Package skiplist implements fast indexable ordered multimaps.
 
