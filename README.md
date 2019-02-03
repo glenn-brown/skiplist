@@ -1,5 +1,3 @@
-# In this fork bugs are corrected.
-
 <pre>
 package skiplist
     import "github.com/glenn-brown/skiplist"
