@@ -2,7 +2,7 @@
 
 <pre>
 package skiplist
-    import "github.com/pashaosipyants/skiplist"
+    import "github.com/glenn-brown/skiplist"
 
     Package skiplist implements fast indexable ordered multimaps.
 
