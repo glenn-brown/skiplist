@@ -20,8 +20,9 @@ package skiplist
 import (
 	"bytes"
 	"fmt"
-	"github.com/glenn-brown/ordinal"
 	"math/rand"
+
+	"github.com/glenn-brown/ordinal"
 )
 
 // A skiplist.T is a skiplist.  A skiplist is linked at multiple
@@ -39,11 +40,11 @@ import (
 //   L2 |---------->|---------->|---------->|------->|---------------->|---->|->/
 //   L1 |---------->|---------->|---------->|->|---->|->|->|->|------->|->|->|->/
 //   L0 |->|->|->|->|->|->|->|->|->|->|->|->|->|->|->|->|->|->|->|->|->|->|->|->/
-//         0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  1  1  1  1  1  1  1  
+//         0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  1  1  1  1  1  1  1
 //         0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f  0  1  2  3  4  5  6
 // The skiplist is searched starting at the top level, going as far right as possible
-// without passing the desired Element, dropping down one level, and repeating for 
-// each level.	
+// without passing the desired Element, dropping down one level, and repeating for
+// each level.
 //
 type T struct {
 	cnt   int
@@ -141,6 +142,11 @@ func (l *T) Front() *Element {
 // Insert a {key,value} pair in the skiplist, optionally replacing the youngest previous entry.
 //
 func (l *T) insert(key interface{}, value interface{}, replace bool) *T {
+	ll, _ := l.insertEl(key, value, replace)
+	return ll
+}
+
+func (l *T) insertEl(key interface{}, value interface{}, replace bool) (*T, *Element) {
 	l.grow()
 	s := l.score(key)
 	prev, pos := l.prevs(key, s)
@@ -173,13 +179,20 @@ func (l *T) insert(key interface{}, value interface{}, replace bool) *T {
 		// Higher levels just get a width adjustment.
 		prev[level].link.width += 1
 	}
-	return l
+	return l, nu
 }
 
 // Insert a {key,value} pair into the skip list in O(log(N)) time.
 //
 func (l *T) Insert(key interface{}, value interface{}) *T {
 	return l.insert(key, value, false)
+}
+
+// Insert a {key,value} pair into the skip list in O(log(N)) time.
+//!!!Not standart - returns Element
+func (l *T) InsertEl(key interface{}, value interface{}) *Element {
+	_, el := l.insertEl(key, value, false)
+	return el
 }
 
 // Get returns the value corresponding to key in the table in O(log(N)) time.
@@ -216,10 +229,12 @@ func (l *T) GetOk(key interface{}) (value interface{}, ok bool) {
 func (l *T) GetAll(key interface{}) (values []interface{}) {
 	s := l.score(key)
 	prevs, _ := l.prevs(key, s)
-	e := prevs[0].link.to
-	for nil != e && e.score == s && !l.less(key, e.key) {
-		values = append(values, e.Value)
-		e = e.links[0].to
+	if len(prevs) > 0 {
+		e := prevs[0].link.to
+		for nil != e && e.score == s && !l.less(key, e.key) {
+			values = append(values, e.Value)
+			e = e.links[0].to
+		}
 	}
 	return values
 }
@@ -258,6 +273,9 @@ func (l *T) remove(prev []prev, elem *Element) *Element {
 func (l *T) Remove(key interface{}) *Element {
 	s := l.score(key)
 	prevs, _ := l.prevs(key, s)
+	if len(prevs) == 0 {
+		return nil
+	}
 	// Verify there is a matching entry to remove.
 	elem := l.prev[0].link.to
 	if elem == nil || s != elem.score || s == elem.score && l.less(key, elem.key) {
@@ -277,6 +295,9 @@ func (l *T) RemoveElement(e *Element) *Element {
 	k := e.key
 	s := l.score(k)
 	prevs, pos := l.prevs(k, s)
+	if len(prevs) == 0 {
+		return nil
+	}
 
 	// Find the position of the matching entry within the multimap group.
 
@@ -288,9 +309,9 @@ func (l *T) RemoveElement(e *Element) *Element {
 
 	levels := len(prevs)
 	for level := 0; level < levels; level++ {
-		for l := prevs[level]; l.pos+l.link.width < pos; {
-			prevs[level].pos = l.pos + l.link.width
-			prevs[level].link = &l.link.to.links[level]
+		for prevs[level].pos+prevs[level].link.width < pos {
+			prevs[level].pos += prevs[level].link.width
+			prevs[level].link = &prevs[level].link.to.links[level]
 		}
 	}
 
@@ -307,6 +328,9 @@ func (l *T) RemoveN(index int) *Element {
 		return nil
 	}
 	prevs := l.prevsN(index)
+	if len(prevs) == 0 {
+		return nil
+	}
 	elem := prevs[0].link.to
 	return l.remove(prevs, elem)
 }
@@ -319,6 +343,9 @@ func (l *T) RemoveN(index int) *Element {
 func (l *T) ElementPos(key interface{}) (e *Element, pos int) {
 	s := l.score(key)
 	prev, pos := l.prevs(key, s)
+	if len(prev) == 0 {
+		return nil, -1
+	}
 	elem := prev[0].link.to
 	if elem == nil || s < elem.score || s == elem.score && l.less(key, elem.key) {
 		return nil, -1
@@ -360,6 +387,9 @@ func (l *T) ElementN(index int) *Element {
 		return nil
 	}
 	prev := l.prevsN(index)
+	if len(prev) == 0 {
+		return nil
+	}
 	return prev[0].link.to
 }
 
@@ -454,7 +484,7 @@ func (l *T) String() string {
 	return string(s)
 }
 
-// The SlowKey interface allows externally-defined types to be used 
+// The SlowKey interface allows externally-defined types to be used
 // as keys.  An a.Less(b) call should return true iff a < b.
 //
 type SlowKey interface {

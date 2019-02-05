@@ -1,5 +1,4 @@
-PACKAGE
-
+<pre>
 package skiplist
     import "github.com/glenn-brown/skiplist"
 
@@ -154,3 +153,4 @@ func (l *T) String() string
     Function String prints only the key/value pairs in the skip list.
 
 
+</pre>
